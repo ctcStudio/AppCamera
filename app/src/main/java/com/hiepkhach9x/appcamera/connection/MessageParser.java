@@ -3,6 +3,7 @@ package com.hiepkhach9x.appcamera.connection;
 import android.text.TextUtils;
 
 import com.hiepkhach9x.appcamera.entities.Device;
+import com.hiepkhach9x.appcamera.entities.RealTime;
 
 import java.util.ArrayList;
 
@@ -14,6 +15,7 @@ public class MessageParser {
 
     private final String SPERATER1 = "////";
     private final String NEW_LINE = "\n";
+    private final String KEY_GPS = "<GPS>";
 
     public MessageParser() {
     }
@@ -75,6 +77,27 @@ public class MessageParser {
             return listId;
 
         }
+        return null;
+    }
+
+    public RealTime parseRealTimeMessage(String message) {
+        if (TextUtils.isEmpty(message)) {
+            return null;
+        }
+
+        if (!message.contains("@message@<picture>@message@")) {
+            return null;
+        }
+
+        int startGps = message.indexOf(KEY_GPS) + KEY_GPS.length();
+        int endGps = message.lastIndexOf(KEY_GPS);
+        if (endGps != -1) {
+            String gps = message.substring(startGps, endGps);
+            int startPicture = endGps + KEY_GPS.length();
+            String picture = message.substring(startPicture, message.length());
+            return new RealTime(gps, picture);
+        }
+
         return null;
     }
 }

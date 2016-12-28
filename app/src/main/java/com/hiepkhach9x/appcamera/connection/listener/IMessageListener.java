@@ -5,5 +5,5 @@ package com.hiepkhach9x.appcamera.connection.listener;
  */
 
 public interface IMessageListener {
-    void handleMessage(String message);
+    void handleMessage(Object message);
 }

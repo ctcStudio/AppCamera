@@ -10,8 +10,11 @@ import com.hiepkhach9x.appcamera.connection.listener.ILoginListener;
 import com.hiepkhach9x.appcamera.connection.listener.IMessageListener;
 import com.hiepkhach9x.appcamera.connection.listener.IRealTimeListener;
 import com.hiepkhach9x.appcamera.entities.Device;
+import com.hiepkhach9x.appcamera.entities.RealTime;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
@@ -33,6 +36,7 @@ enum MessageType {
 }
 
 public class Client implements IClient {
+    private final String TAG = "Client";
     private Socket mSocket;
     private InputStreamReader streamReader;
     private OutputStreamWriter streamWriter;
@@ -85,13 +89,15 @@ public class Client implements IClient {
     @Override
     public boolean sendLoginReadTimeMessage(String userName, String pass) {
         mCurrentType = MessageType.LOGIN_REALTIME;
-        return false;
+        String msg = "@haicuongplayer@:demo:123456";
+        return sendMessage(msg);
     }
 
     @Override
     public boolean sendGetReadTimeIdMessage(String id) {
         mCurrentType = MessageType.REALTIME;
-        return false;
+        String msg = "@message@yeucaulive@message@////1600000000000020////";
+        return sendMessage(msg);
     }
 
     @Override
@@ -166,7 +172,7 @@ public class Client implements IClient {
                     }
                 } catch (IOException ex) {
                     message = stringBuilder.toString();
-                    Log.d("HungHN", message);
+                    Log.d(TAG, message);
                     stringBuilder = new StringBuilder();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -176,28 +182,58 @@ public class Client implements IClient {
                     case LOGIN:
                         ArrayList<Device> devices = messageParser.parseDevice(message);
                         if (devices != null) {
-                            for (Device device : devices) {
-                                Log.d("HungHN", device.toString());
+                            for (IMessageListener messageListener : listenerList) {
+                                if (messageListener instanceof ILoginListener && mCurrentType == MessageType.LOGIN) {
+                                    Deliver deliver = new Deliver(devices, messageListener);
+                                    deliver.start();
+                                }
                             }
                         }
                         break;
                     case ONLINE:
                         ArrayList<String> listIdOnline = messageParser.parseIdOnline(message);
                         if (listIdOnline != null) {
-                            Log.d("HungHN", "Number online: " + listIdOnline.size());
+                            for (IMessageListener messageListener : listenerList) {
+                                if (messageListener instanceof ICheckOnlineListener && mCurrentType == MessageType.ONLINE) {
+                                    Deliver deliver = new Deliver(listIdOnline, messageListener);
+                                    deliver.start();
+                                }
+                            }
                         }
                         break;
                     case LOGIN_REALTIME:
+
                         break;
                     case REALTIME:
+                        RealTime realTime = messageParser.parseRealTimeMessage(message);
+                        if (realTime != null) {
+                            Log.d("HungHN","index start: " + realTime.getPictureData().indexOf("0xFFD8"));
+                            for (IMessageListener messageListener : listenerList) {
+                                if (messageListener instanceof IRealTimeListener && mCurrentType == MessageType.REALTIME) {
+                                    Deliver deliver = new Deliver(realTime, messageListener);
+                                    deliver.start();
+                                }
+                            }
+                        }
                         break;
                     case GETDATA:
                         break;
                 }
             }
         }
-    }
 
-    private void deliverMsg(Object object) {
+        class Deliver extends Thread {
+            Object msg;
+            IMessageListener listener;
+
+            public Deliver(Object msg, IMessageListener listener) {
+                this.msg = msg;
+                this.listener = listener;
+            }
+
+            public void run() {
+                this.listener.handleMessage(this.msg);
+            }
+        }
     }
 }
