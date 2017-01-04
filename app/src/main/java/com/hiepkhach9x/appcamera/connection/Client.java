@@ -1,56 +1,41 @@
 package com.hiepkhach9x.appcamera.connection;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.hiepkhach9x.appcamera.Config;
-import com.hiepkhach9x.appcamera.connection.listener.ICheckOnlineListener;
 import com.hiepkhach9x.appcamera.connection.listener.IClient;
-import com.hiepkhach9x.appcamera.connection.listener.IGetDataListener;
-import com.hiepkhach9x.appcamera.connection.listener.ILoginListener;
 import com.hiepkhach9x.appcamera.connection.listener.IMessageListener;
-import com.hiepkhach9x.appcamera.connection.listener.IRealTimeListener;
-import com.hiepkhach9x.appcamera.entities.Device;
-import com.hiepkhach9x.appcamera.entities.RealTime;
+import com.hiepkhach9x.appcamera.entities.Message;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created by hungh on 12/27/2016.
  */
-
-enum MessageType {
-    LOGIN,
-    ONLINE,
-    LOGIN_REALTIME,
-    REALTIME,
-    GETDATA
-}
-
 public class Client implements IClient {
     private final String TAG = "Client";
     private Socket mSocket;
-    private InputStreamReader streamReader;
+    private InputStream stream;
     private OutputStreamWriter streamWriter;
     private StringBuilder stringBuilder;
     private ReadSocketThread socketThread;
     private List<IMessageListener> listenerList;
     private MessageType mCurrentType;
 
-    public Client() throws IOException {
-        InetAddress serverAddress = InetAddress.getByName(Config.SERVER_ADDRESS);
+    public Client(String sever) throws IOException {
+        InetAddress serverAddress = InetAddress.getByName(sever);
         mSocket = new Socket(serverAddress, Config.SERVER_PORT);
         mSocket.setSoTimeout(Config.SOCKET_TIMOUT);
 
-        streamReader = new InputStreamReader(mSocket.getInputStream(), "UTF-8");
+        stream = mSocket.getInputStream();
         streamWriter = new OutputStreamWriter(mSocket.getOutputStream(), "UTF-8");
         stringBuilder = new StringBuilder();
         socketThread = new ReadSocketThread();
@@ -96,7 +81,7 @@ public class Client implements IClient {
     @Override
     public boolean sendGetReadTimeIdMessage(String id) {
         mCurrentType = MessageType.REALTIME;
-        String msg = "@message@yeucaulive@message@////1600000000000020////";
+        String msg = "@message@yeucaulive@message@////1600000000000025////";
         return sendMessage(msg);
     }
 
@@ -122,117 +107,61 @@ public class Client implements IClient {
     }
 
     @Override
-    public void addILoginListener(ILoginListener loginListener) {
-        if (loginListener != null) {
-            listenerList.add(loginListener);
+    public void addIMessageListener(IMessageListener messageListener) {
+        if (messageListener != null) {
+            listenerList.add(messageListener);
         }
     }
-
-    @Override
-    public void addCheckOnlineListener(ICheckOnlineListener checkOnlineListener) {
-        if (checkOnlineListener != null) {
-            listenerList.add(checkOnlineListener);
-        }
-    }
-
-    @Override
-    public void addReadTimeListener(IRealTimeListener realTimeListener) {
-        if (realTimeListener != null) {
-            listenerList.add(realTimeListener);
-        }
-    }
-
-    @Override
-    public void addGetDataListener(IGetDataListener getDataListener) {
-        if (getDataListener != null) {
-            listenerList.add(getDataListener);
-        }
-    }
-
 
     private class ReadSocketThread extends Thread {
         @Override
         public void run() {
             super.run();
-            MessageParser messageParser = new MessageParser();
             while (true) {
                 if (mSocket == null || mSocket.isClosed()) {
                     dispose();
                     return;
                 }
-                String message = null;
+                String msg = null;
                 try {
-                    char[] buf = new char[50];
-                    int read = streamReader.read(buf);
-                    if (read != -1) {
-                        String str = new String(buf).trim();
+                    ByteArrayOutputStream result = new ByteArrayOutputStream();
+                    byte[] buffer = new byte[1024];
+                    int length = stream.read(buffer);
+                    if (length != -1) {
+                        result.write(buffer, 0, length);
+                        String str = result.toString("UTF-8").trim();
                         stringBuilder.append(str);
-                    } else {
-                        this.sleep(100);
                     }
                 } catch (IOException ex) {
-                    message = stringBuilder.toString();
-                    Log.d(TAG, message);
+                    msg = stringBuilder.toString();
+                    Log.d(TAG, msg);
                     stringBuilder = new StringBuilder();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
 
-                switch (mCurrentType) {
-                    case LOGIN:
-                        ArrayList<Device> devices = messageParser.parseDevice(message);
-                        if (devices != null) {
-                            for (IMessageListener messageListener : listenerList) {
-                                if (messageListener instanceof ILoginListener && mCurrentType == MessageType.LOGIN) {
-                                    Deliver deliver = new Deliver(devices, messageListener);
-                                    deliver.start();
-                                }
-                            }
-                        }
-                        break;
-                    case ONLINE:
-                        ArrayList<String> listIdOnline = messageParser.parseIdOnline(message);
-                        if (listIdOnline != null) {
-                            for (IMessageListener messageListener : listenerList) {
-                                if (messageListener instanceof ICheckOnlineListener && mCurrentType == MessageType.ONLINE) {
-                                    Deliver deliver = new Deliver(listIdOnline, messageListener);
-                                    deliver.start();
-                                }
-                            }
-                        }
-                        break;
-                    case LOGIN_REALTIME:
-
-                        break;
-                    case REALTIME:
-                        RealTime realTime = messageParser.parseRealTimeMessage(message);
-                        if (realTime != null) {
-                            Log.d("HungHN","index start: " + realTime.getPictureData().indexOf("0xFFD8"));
-                            for (IMessageListener messageListener : listenerList) {
-                                if (messageListener instanceof IRealTimeListener && mCurrentType == MessageType.REALTIME) {
-                                    Deliver deliver = new Deliver(realTime, messageListener);
-                                    deliver.start();
-                                }
-                            }
-                        }
-                        break;
-                    case GETDATA:
-                        break;
+                if (TextUtils.isEmpty(msg)) {
+                    continue;
+                }
+                Message message = new Message();
+                message.setMessageType(mCurrentType);
+                message.setData(msg);
+                for (IMessageListener messageListener : listenerList) {
+                    Deliver deliver = new Deliver(message, messageListener);
+                    deliver.start();
                 }
             }
         }
 
         class Deliver extends Thread {
-            Object msg;
+            Message message;
             IMessageListener listener;
 
-            public Deliver(Object msg, IMessageListener listener) {
-                this.msg = msg;
+            public Deliver(Message message, IMessageListener listener) {
+                this.message = message;
                 this.listener = listener;
             }
 
             public void run() {
-                this.listener.handleMessage(this.msg);
+                this.listener.handleMessage(message);
             }
         }
     }

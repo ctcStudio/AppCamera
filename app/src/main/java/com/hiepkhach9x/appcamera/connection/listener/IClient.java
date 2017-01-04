@@ -19,11 +19,5 @@ public interface IClient {
 
     void dispose();
 
-    void addILoginListener(ILoginListener loginListener);
-
-    void addCheckOnlineListener(ICheckOnlineListener checkOnlineListener);
-
-    void addReadTimeListener(IRealTimeListener realTimeListener);
-
-    void addGetDataListener(IGetDataListener getDataListener);
+    void addIMessageListener(IMessageListener messageListener);
 }
