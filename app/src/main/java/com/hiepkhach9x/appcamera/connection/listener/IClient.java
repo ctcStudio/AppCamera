@@ -1,23 +1,27 @@
 package com.hiepkhach9x.appcamera.connection.listener;
 
-import java.util.ArrayList;
 
 /**
  * Created by hungh on 12/27/2016.
  */
 
 public interface IClient {
-    boolean sendLoginMessage(String userName, String pass);
 
-    boolean sendCheckOnlineMessage(ArrayList<String> listId);
+    boolean sendLoginMessage(String message);
 
-    boolean sendLoginReadTimeMessage(String userName, String pass);
+    boolean sendCheckOnlineMessage(String message);
 
-    boolean sendGetReadTimeIdMessage(String id);
+    boolean sendLoginReadTimeMessage(String message);
 
-    boolean sendGetDataMessage(String userName, String pass, ArrayList<String> listId);
+    boolean sendGetReadTimeIdMessage(String message);
+
+    boolean sendGetDataMessage(String message);
+
+    boolean sendMessage(String message);
 
     void dispose();
 
     void addIMessageListener(IMessageListener messageListener);
+
+    void removeIMessageListener(IMessageListener messageListener);
 }

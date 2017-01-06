@@ -8,7 +8,7 @@ import com.hiepkhach9x.appcamera.connection.MessageType;
 
 public class Message {
     private MessageType messageType;
-    private String data;
+    private byte[] data;
 
     public Message() {
     }
@@ -21,15 +21,35 @@ public class Message {
         this.messageType = messageType;
     }
 
-    public String getData() {
+    public byte[] getData() {
         return data;
     }
 
-    public void setData(String data) {
+    public String getDataToString() {
+        return new String(data).trim();
+    }
+
+    public void setData(byte[] data) {
         this.data = data;
     }
 
     public boolean isLoginType() {
         return (messageType == MessageType.LOGIN);
+    }
+
+    public boolean isLoginRealTime() {
+        return messageType == MessageType.LOGIN_REALTIME;
+    }
+
+    public boolean isRealTime() {
+        return messageType == MessageType.REALTIME;
+    }
+
+    public boolean isCheckOnline() {
+        return messageType == MessageType.ONLINE;
+    }
+
+    public boolean isStoreData() {
+        return messageType == MessageType.GETDATA;
     }
 }

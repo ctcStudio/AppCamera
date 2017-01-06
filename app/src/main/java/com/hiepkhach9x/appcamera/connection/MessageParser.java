@@ -1,11 +1,17 @@
 package com.hiepkhach9x.appcamera.connection;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.hiepkhach9x.appcamera.entities.Device;
+import com.hiepkhach9x.appcamera.entities.Message;
 import com.hiepkhach9x.appcamera.entities.RealTime;
+import com.hiepkhach9x.appcamera.util.BitConverter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by hungh on 12/27/2016.
@@ -80,24 +86,66 @@ public class MessageParser {
         return null;
     }
 
-    public RealTime parseRealTimeMessage(String message) {
-        if (TextUtils.isEmpty(message)) {
+    public RealTime parseRealTimeMessage(Message message) {
+        if (!message.isRealTime()) {
             return null;
         }
 
-        if (!message.contains("@message@<picture>@message@")) {
-            return null;
-        }
+        byte[] bytes = message.getData();
+        int beginPic = 0;
+        int endPic = 0;
+        for (int i = 0; i < bytes.length - 1; i++) {
+            if (((bytes[i] == (byte) 0xFF)
+                    && (bytes[i + 1] == (byte) 0xD8))) {
+                beginPic = i;
+                Log.d("HungHN", "BeginPic: " + beginPic);
+            }
 
-        int startGps = message.indexOf(KEY_GPS) + KEY_GPS.length();
-        int endGps = message.lastIndexOf(KEY_GPS);
-        if (endGps != -1) {
-            String gps = message.substring(startGps, endGps);
-            int startPicture = endGps + KEY_GPS.length();
-            String picture = message.substring(startPicture, message.length());
-            return new RealTime(gps, picture);
+            if (((bytes[i] == (byte) 0xFF)
+                    && (bytes[i + 1] == (byte) 0xD9))) {
+                endPic = i + 1;
+                Log.d("HungHN", "EndPic: " + endPic);
+                break;
+            }
+        }
+        if (endPic - beginPic > 100) {
+            byte[] gpsBytes = Arrays.copyOf(bytes, beginPic);
+            String gpsAll = new String(gpsBytes).trim();
+            int startGps = gpsAll.indexOf(KEY_GPS) + KEY_GPS.length();
+            int endGps = gpsAll.lastIndexOf(KEY_GPS);
+            String gps = gpsAll.substring(startGps, endGps);
+            byte[] pic = Arrays.copyOfRange(bytes, beginPic, endPic);
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            Bitmap bitmap = BitmapFactory.decodeByteArray(pic, 0, pic.length, options);
+            Log.d("HungHN", "has bitmap: " + (bitmap != null));
+            long cameId = 0;
+            if (endPic + 8 <= bytes.length) {
+                cameId = BitConverter.toInt64(bytes, endPic + 1);
+                Log.d("HungHN", "ID camera: " + cameId);
+            }
+            return new RealTime(gps, bitmap, cameId);
         }
 
         return null;
+    }
+
+    public String genMessageCheckOnline(ArrayList<String> listId) {
+        StringBuilder builder = new StringBuilder("@message@checkonline@message@////");
+        for (String id : listId) {
+            builder.append(id + SPERATER1);
+        }
+        return builder.toString();
+    }
+
+    public String genMessageLogin(String userName, String pass) {
+        return "@haicuong@:" + userName + ":" + pass;
+    }
+
+    public String genLoginRealTime(String userName, String password) {
+        return "@haicuongplayer@:" + userName + ":" + password;
+    }
+
+    public String genMessageRealTime(String cameraId) {
+        return "@message@yeucaulive@message@" + SPERATER1 + cameraId + SPERATER1;
     }
 }

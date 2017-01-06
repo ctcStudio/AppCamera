@@ -12,9 +12,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -25,25 +25,29 @@ public class Client implements IClient {
     private Socket mSocket;
     private InputStream stream;
     private OutputStreamWriter streamWriter;
-    private StringBuilder stringBuilder;
     private ReadSocketThread socketThread;
     private List<IMessageListener> listenerList;
     private MessageType mCurrentType;
+    private MessageParser mMessageParser;
 
-    public Client(String sever) throws IOException {
-        InetAddress serverAddress = InetAddress.getByName(sever);
-        mSocket = new Socket(serverAddress, Config.SERVER_PORT);
-        mSocket.setSoTimeout(Config.SOCKET_TIMOUT);
+    public Client(String sever) {
+        try {
+            mSocket = new Socket(sever, Config.SERVER_PORT);
+            mSocket.setSoTimeout(Config.SOCKET_TIMOUT);
 
-        stream = mSocket.getInputStream();
-        streamWriter = new OutputStreamWriter(mSocket.getOutputStream(), "UTF-8");
-        stringBuilder = new StringBuilder();
-        socketThread = new ReadSocketThread();
-        socketThread.start();
-        listenerList = new ArrayList<>();
-        mCurrentType = MessageType.LOGIN;
+            stream = mSocket.getInputStream();
+            streamWriter = new OutputStreamWriter(mSocket.getOutputStream(), "UTF-8");
+            socketThread = new ReadSocketThread();
+            socketThread.start();
+            listenerList = new ArrayList<>();
+            mCurrentType = MessageType.LOGIN;
+            mMessageParser = new MessageParser();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
+    @Override
     public boolean sendMessage(String message) {
         if (mSocket != null) {
             try {
@@ -58,37 +62,37 @@ public class Client implements IClient {
     }
 
     @Override
-    public boolean sendLoginMessage(String userName, String pass) {
+    public boolean sendLoginMessage(String msg) {
         mCurrentType = MessageType.LOGIN;
-        String msg = "@haicuong@:" + userName + ":" + pass;
+        //String msg = "@haicuong@:" + userName + ":" + pass;
         return sendMessage(msg);
     }
 
     @Override
-    public boolean sendCheckOnlineMessage(ArrayList<String> listId) {
+    public boolean sendCheckOnlineMessage(String msg) {
         mCurrentType = MessageType.ONLINE;
-        String msg = "@message@checkonline@message@////1600000000000020////1500000000010001////1600000000000025////1600000000000026////";
+        //String msg = "@message@checkonline@message@////1600000000000020////1500000000010001////1600000000000025////1600000000000026////";
         return sendMessage(msg);
     }
 
     @Override
-    public boolean sendLoginReadTimeMessage(String userName, String pass) {
+    public boolean sendLoginReadTimeMessage(String msg) {
         mCurrentType = MessageType.LOGIN_REALTIME;
-        String msg = "@haicuongplayer@:demo:123456";
+        //String msg = "@haicuongplayer@:demo:123456";
         return sendMessage(msg);
     }
 
     @Override
-    public boolean sendGetReadTimeIdMessage(String id) {
+    public boolean sendGetReadTimeIdMessage(String msg) {
         mCurrentType = MessageType.REALTIME;
-        String msg = "@message@yeucaulive@message@////1600000000000025////";
+        //String msg = "@message@yeucaulive@message@////1600000000000025////";
         return sendMessage(msg);
     }
 
     @Override
-    public boolean sendGetDataMessage(String userName, String pass, ArrayList<String> listId) {
+    public boolean sendGetDataMessage(String msg) {
         mCurrentType = MessageType.GETDATA;
-        return false;
+        return sendMessage(msg);
     }
 
     public void dispose() {
@@ -104,6 +108,7 @@ public class Client implements IClient {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+        Log.d(TAG,"Client is closed!");
     }
 
     @Override
@@ -113,37 +118,48 @@ public class Client implements IClient {
         }
     }
 
+    @Override
+    public void removeIMessageListener(IMessageListener messageListener) {
+        if (listenerList == null || listenerList.isEmpty()) {
+            return;
+        }
+        Iterator<IMessageListener> iterator = listenerList.iterator();
+        while (iterator.hasNext()) {
+            IMessageListener listener = iterator.next();
+            if (listener.getTag().equalsIgnoreCase(messageListener.getTag())) {
+                iterator.remove();
+            }
+        }
+    }
+
     private class ReadSocketThread extends Thread {
         @Override
         public void run() {
             super.run();
+            ByteArrayOutputStream result = new ByteArrayOutputStream();
             while (true) {
                 if (mSocket == null || mSocket.isClosed()) {
                     dispose();
                     return;
                 }
-                String msg = null;
+                byte[] dataResult = null;
                 try {
-                    ByteArrayOutputStream result = new ByteArrayOutputStream();
                     byte[] buffer = new byte[1024];
                     int length = stream.read(buffer);
                     if (length != -1) {
                         result.write(buffer, 0, length);
-                        String str = result.toString("UTF-8").trim();
-                        stringBuilder.append(str);
                     }
                 } catch (IOException ex) {
-                    msg = stringBuilder.toString();
-                    Log.d(TAG, msg);
-                    stringBuilder = new StringBuilder();
+                    dataResult = result.toByteArray();
+                    result.reset();
                 }
 
-                if (TextUtils.isEmpty(msg)) {
+                if (dataResult == null || dataResult.length < 1) {
                     continue;
                 }
                 Message message = new Message();
                 message.setMessageType(mCurrentType);
-                message.setData(msg);
+                message.setData(dataResult);
                 for (IMessageListener messageListener : listenerList) {
                     Deliver deliver = new Deliver(message, messageListener);
                     deliver.start();

@@ -2,6 +2,7 @@ package com.hiepkhach9x.appcamera;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -10,20 +11,21 @@ import android.widget.Spinner;
 
 import com.hiepkhach9x.appcamera.connection.Client;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
-import com.hiepkhach9x.appcamera.connection.MessageType;
 import com.hiepkhach9x.appcamera.connection.listener.IMessageListener;
 import com.hiepkhach9x.appcamera.entities.Device;
 import com.hiepkhach9x.appcamera.entities.Message;
+import com.hiepkhach9x.appcamera.preference.UserPref;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Created by hungh on 1/4/2017.
  */
 
 public class LoginFragment extends BaseFragment {
-    private Client mClient;
+    private final String TAG_LOGIN_LISTENER = "frgLogin_login_listener";
+    Client mClient;
     private String[] serverNames;
     private String[] listServerAddress;
 
@@ -33,26 +35,61 @@ public class LoginFragment extends BaseFragment {
 
     private String userName, password, serverAddress;
 
+    private ArrayList<Device> devices;
     private MessageParser messageParser = new MessageParser();
 
-    private IMessageListener iMessageListener = new IMessageListener() {
+    private IMessageListener iLoginMessageListener = new IMessageListener() {
+        @Override
+        public String getTag() {
+            return TAG_LOGIN_LISTENER;
+        }
+
         @Override
         public void handleMessage(Message message) {
             if (message.isLoginType()) {
-                String data = message.getData();
+                String data = message.getDataToString();
                 if (data.contains("ketthuckhoitaohethong")) {
                     Log.d("HungHN", "finish receive data login");
-                    dismissDialog();
+
+                    if (mClient != null)
+                        mClient.sendCheckOnlineMessage(messageParser.genMessageCheckOnline(getListCameraIdFromDevice()));
                 } else if (data.contains("cameralistbegin")) {
-                    List<Device> devices = messageParser.parseDevice(message.getData());
-                    Log.d("HungHN", "data devices receive: " + devices.size());
+                    devices = messageParser.parseDevice(message.getDataToString());
                 } else if (data.contains("khoitaohethong")) {
                     Log.d("HungHN", "start receive data login");
                 }
+            }
 
+            if (message.isCheckOnline()) {
+                ArrayList<String> listOnline = messageParser.parseIdOnline(message.getDataToString());
+                updateDeviceOnline(listOnline);
+                dismissDialog();
+                HomeFragment homeFragment = HomeFragment.newInstance(devices);
+                if (mNavigateManager != null)
+                    mNavigateManager.swapPage(homeFragment, MainActivity.TAG_HOME);
             }
         }
     };
+
+    private void updateDeviceOnline(ArrayList<String> listOnline) {
+        if ((listOnline != null && !listOnline.isEmpty())
+                && (devices != null & !devices.isEmpty())) {
+            for (Device device : devices) {
+                ArrayList<Device.Camera> cameras = device.getCameras();
+                if (cameras == null || cameras.isEmpty())
+                    continue;
+                for (Device.Camera camera : cameras) {
+                    for (String cameraId : listOnline) {
+                        if (camera.getCameraId().equals(cameraId)) {
+                            camera.setOnline(true);
+                        }
+
+                    }
+                }
+            }
+        }
+    }
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -79,6 +116,10 @@ public class LoginFragment extends BaseFragment {
                 userName = edUserName.getText().toString();
                 password = edPassword.getText().toString();
                 serverAddress = listServerAddress[spServerCollections.getSelectedItemPosition()];
+                UserPref userPref = UserPref.getInstance();
+                userPref.saveServerAddress(serverAddress);
+                userPref.saveUserName(userName);
+                userPref.savePassword(password);
                 showDialog();
                 login();
             }
@@ -86,6 +127,21 @@ public class LoginFragment extends BaseFragment {
 
         edUserName.setText("demo");
         edPassword.setText("123456");
+    }
+
+    private ArrayList<String> getListCameraIdFromDevice() {
+        ArrayList<String> strings = new ArrayList<>();
+        for (Device device : devices) {
+            ArrayList<Device.Camera> cameras = device.getCameras();
+            if (cameras != null) {
+                for (Device.Camera camera : cameras) {
+                    if (!TextUtils.isEmpty(camera.getCameraId())) {
+                        strings.add(camera.getCameraId());
+                    }
+                }
+            }
+        }
+        return strings;
     }
 
     @Override
@@ -98,16 +154,24 @@ public class LoginFragment extends BaseFragment {
     }
 
     private void login() {
+        final UserPref userPref = UserPref.getInstance();
+        userPref.saveServerAddress(serverAddress);
+        userPref.saveUserName(userName);
+        userPref.savePassword(password);
+
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 try {
+                    if (mClient != null) {
+                        mClient.dispose();
+                        mClient = null;
+                    }
                     mClient = new Client(serverAddress);
-                    mClient.addIMessageListener(iMessageListener);
+                    mClient.addIMessageListener(iLoginMessageListener);
                     new Thread().sleep(100);
-                    mClient.sendLoginMessage(userName, password);
-                } catch (IOException e) {
-                    e.printStackTrace();
+
+                    mClient.sendLoginMessage(messageParser.genMessageLogin(userName,password));
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

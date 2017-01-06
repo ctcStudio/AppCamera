@@ -5,9 +5,12 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 
 public class MainActivity extends AppCompatActivity implements NavigateManager {
     public static final String TAG_LOGIN = "LOGIN-FRAGMENT";
+    public static final String TAG_HOME = "HOME-FRAGMENT";
+    public static final String TAG_CAMERA = "CAMERA-FRAGMENT";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +39,8 @@ public class MainActivity extends AppCompatActivity implements NavigateManager {
     public void addPage(Fragment fragment, String tag) {
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
-        transaction.add(getContentLayout(), fragment, tag);
+        transaction.replace(getContentLayout(), fragment, tag);
+        transaction.addToBackStack(null);
         transaction.commit();
     }
 
@@ -45,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements NavigateManager {
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         transaction.replace(getContentLayout(), fragment, tag);
-        transaction.commitAllowingStateLoss();
+        transaction.commit();
     }
 
     @Override

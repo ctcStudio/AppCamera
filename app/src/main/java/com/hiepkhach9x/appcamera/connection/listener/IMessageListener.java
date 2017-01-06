@@ -7,5 +7,6 @@ import com.hiepkhach9x.appcamera.entities.Message;
  */
 
 public interface IMessageListener {
+    String getTag();
     void handleMessage(Message message);
 }

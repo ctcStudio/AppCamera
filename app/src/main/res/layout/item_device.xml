@@ -3,17 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-
     <TextView
+        android:id="@+id/device_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="@dimen/space_large"
-        android:text="Camera List" />
-
-    <ExpandableListView
-        android:id="@+id/list_device"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:groupIndicator="@null"/>
+        android:padding="@dimen/space_normal"
+        android:text="Device name"/>
 </LinearLayout>
