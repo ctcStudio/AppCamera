@@ -4,44 +4,70 @@
     android:layout_height="match_parent">
 
     <LinearLayout
+        android:id="@+id/layout_control"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:background="@color/colorAccent">
+
+        <Button
+            android:id="@+id/view_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/space_largest"
+            android:text="Xem tất cả camera" />
+
+        <Button
+            android:id="@+id/view_favorites"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/space_largest"
+            android:text="Xem camera đã lưu" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_login"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_gravity="center"
         android:gravity="center"
-        android:padding="@dimen/space_normal"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="@dimen/space_largest"
+        android:background="@color/colorAccent">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/login"
             android:padding="@dimen/space_normal"
-            android:textSize="@dimen/text_largest"/>
+            android:text="@string/login"
+            android:textSize="@dimen/text_largest" />
 
         <EditText
             android:id="@+id/userName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/space_normal"
             android:layout_marginTop="@dimen/space_largest"
             android:hint="@string/username"
-            android:textSize="@dimen/text_normal"/>
+            android:padding="@dimen/space_normal"
+            android:textSize="@dimen/text_normal" />
+
         <EditText
             android:id="@+id/password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/space_normal"
             android:layout_marginTop="@dimen/space_small"
-            android:inputType="textPassword"
             android:hint="@string/password"
-            android:textSize="@dimen/text_normal"/>
+            android:inputType="textPassword"
+            android:padding="@dimen/space_normal"
+            android:textSize="@dimen/text_normal" />
 
         <Spinner
             android:id="@+id/serverCollections"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/space_normal"
-            android:layout_marginTop="@dimen/space_large"/>
+            android:layout_marginTop="@dimen/space_large"
+            android:padding="@dimen/space_normal" />
 
         <Button
             android:id="@+id/button_login"
