@@ -33,7 +33,7 @@ public class MessageParser {
         if (!message.contains("cameralistbegin")) {
             return null;
         }
-        int startList = message.indexOf(NEW_LINE) + 1;
+        int startList = message.indexOf("cameralistbegin") + 1;
         int endList = message.indexOf("cameralistend");
         String deviceData = message.substring(startList, endList);
         String[] dataDevice = deviceData.split(NEW_LINE);
@@ -42,7 +42,7 @@ public class MessageParser {
         }
         ArrayList<Device> devices = new ArrayList<>();
         for (String strDevice : dataDevice) {
-            String[] data = strDevice.split(SPERATER1);
+            String[] data = strDevice.trim().replace(NEW_LINE,"").split(SPERATER1);
             if (data.length > 1) {
                 Device device = new Device();
                 String deviceName = data[0];
@@ -116,13 +116,13 @@ public class MessageParser {
             if(startGps < endGps) {
                 gps = gpsAll.substring(startGps, endGps);
             }
-            byte[] pic = Arrays.copyOfRange(bytes, beginPic, endPic);
+            byte[] pic = Arrays.copyOfRange(bytes, beginPic, endPic + 1); // picture from 0xFF8 to 0xFF9
             BitmapFactory.Options options = new BitmapFactory.Options();
             Bitmap bitmap = BitmapFactory.decodeByteArray(pic, 0, pic.length, options);
             Log.d("HungHN", "has bitmap: " + (bitmap != null));
             long cameId = 0;
             if (endPic + 8 <= bytes.length) {
-                cameId = BitConverter.toInt64(bytes, endPic + 1);
+                cameId = BitConverter.toInt64(bytes, endPic + 1); // 8 byte sau picture
                 Log.d("HungHN", "ID camera: " + cameId);
             }
             return new RealTime(gps, bitmap, cameId);

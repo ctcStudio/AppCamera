@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 
+import com.hiepkhach9x.appcamera.entities.MessageClient;
+
 import java.util.ArrayList;
 
 /**
@@ -49,5 +51,10 @@ public class ListCameraFragment extends BaseFragment {
     @Override
     public int getLayoutId() {
         return R.layout.fragment_list_camera;
+    }
+
+    @Override
+    public void handleMessageClient(MessageClient messageClient) {
+
     }
 }

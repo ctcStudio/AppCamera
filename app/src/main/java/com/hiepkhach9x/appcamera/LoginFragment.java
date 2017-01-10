@@ -13,9 +13,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
-import com.hiepkhach9x.appcamera.connection.Client;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
-import com.hiepkhach9x.appcamera.connection.listener.IMessageListener;
 import com.hiepkhach9x.appcamera.entities.Device;
 import com.hiepkhach9x.appcamera.entities.MessageClient;
 import com.hiepkhach9x.appcamera.preference.UserPref;
@@ -28,8 +26,6 @@ import java.util.ArrayList;
 
 public class LoginFragment extends BaseFragment implements View.OnClickListener {
     private static final java.lang.String ARGS_HAS_LOGIN = "args.has.login";
-    private final String TAG_LOGIN_LISTENER = "frgLogin_login_listener";
-    Client mClient;
     private String[] serverNames;
     private String[] listServerAddress;
 
@@ -38,7 +34,7 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
     private EditText edPassword;
     private Spinner spServerCollections;
     private LinearLayout layoutControl;
-    private Button btnViewAll,btnViewFavorites;
+    private Button btnViewAll, btnViewFavorites;
 
     private String userName, password, serverAddress;
     private boolean hasLogin;
@@ -46,49 +42,8 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
     private ArrayList<Device> devices;
     private MessageParser messageParser = new MessageParser();
 
-    private IMessageListener iLoginMessageListener = new IMessageListener() {
-        @Override
-        public String getLsTag() {
-            return TAG_LOGIN_LISTENER;
-        }
-
-        @Override
-        public void handleMessage(MessageClient messageClient) {
-            Log.d("HungHN",messageClient.getDataToString());
-            if (messageClient.isLoginType()) {
-                String data = messageClient.getDataToString();
-                if (data.contains("ketthuckhoitaohethong")) {
-                    Log.d("HungHN", "finish receive data login");
-                    hasLogin = true;
-                    if (mClient != null)
-                        mClient.sendCheckOnlineMessage(messageParser.genMessageCheckOnline(getListCameraIdFromDevice()));
-                } else if (data.contains("cameralistbegin")) {
-                    devices = messageParser.parseDevice(messageClient.getDataToString());
-                } else if (data.contains("khoitaohethong")) {
-                    Log.d("HungHN", "start receive data login");
-                }
-            }
-
-            if (messageClient.isCheckOnline()) {
-                Log.d("HungHN","Check online: " + messageClient.getDataToString());
-                ArrayList<String> listOnline = messageParser.parseIdOnline(messageClient.getDataToString());
-                updateDeviceOnline(listOnline);
-                dismissDialog();
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        viewLayout();
-                    }
-                });
-                HomeFragment homeFragment = HomeFragment.newInstance(devices);
-                if (mNavigateManager != null)
-                    mNavigateManager.swapPage(homeFragment, MainActivity.TAG_HOME);
-            }
-        }
-    };
-
     private void viewLayout() {
-        if(hasLogin) {
+        if (hasLogin) {
             layoutLogin.setVisibility(View.INVISIBLE);
             layoutControl.setVisibility(View.VISIBLE);
         } else {
@@ -120,7 +75,7 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(savedInstanceState !=null) {
+        if (savedInstanceState != null) {
             hasLogin = savedInstanceState.getBoolean(ARGS_HAS_LOGIN);
         }
         serverNames = getResources().getStringArray(R.array.server_collections);
@@ -130,7 +85,7 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(ARGS_HAS_LOGIN,hasLogin);
+        outState.putBoolean(ARGS_HAS_LOGIN, hasLogin);
     }
 
     @Override
@@ -195,10 +150,6 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (mClient != null) {
-            mClient.dispose();
-            mClient = null;
-        }
     }
 
     private void login() {
@@ -207,30 +158,60 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
         userPref.saveUserName(userName);
         userPref.savePassword(password);
 
-        Runnable runnable = new Runnable() {
+        Thread loginThread = new Thread() {
             @Override
             public void run() {
-                try {
-                    if (mClient != null) {
-                        mClient.dispose();
-                        mClient = null;
-                    }
-                    mClient = new Client(serverAddress);
-                    mClient.addIMessageListener(iLoginMessageListener);
-                    new Thread().sleep(100);
+                super.run();
 
-                    mClient.sendLoginMessage(messageParser.genMessageLogin(userName,password));
+                try {
+                    if (mLoginClient != null) {
+                        mLoginClient.initClient();
+                    }
+                    sleep(200);
+                    mLoginClient.sendLogin(userName, password);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+
             }
         };
-        new Thread(runnable).start();
+        loginThread.start();
     }
 
     @Override
     public int getLayoutId() {
         return R.layout.fragment_login;
+    }
+
+    @Override
+    public void handleMessageClient(MessageClient messageClient) {
+        Log.d("HungHN", messageClient.getDataToString());
+        if (messageClient.isLoginType()) {
+            String data = messageClient.getDataToString();
+            if (data.contains("ketthuckhoitaohethong")) {
+                hasLogin = true;
+                if (mLoginClient != null && mLoginClient.isClientAlive())
+                    mLoginClient.sendCheckOnline(getListCameraIdFromDevice());
+            } else if (data.contains("cameralistbegin")) {
+                devices = messageParser.parseDevice(messageClient.getDataToString());
+            } else if (data.contains("khoitaohethong")) {
+            }
+        }
+
+        if (messageClient.isCheckOnline()) {
+            ArrayList<String> listOnline = messageParser.parseIdOnline(messageClient.getDataToString());
+            updateDeviceOnline(listOnline);
+            dismissDialog();
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    viewLayout();
+                }
+            });
+            HomeFragment homeFragment = HomeFragment.newInstance(devices);
+            if (mNavigateManager != null)
+                mNavigateManager.swapPage(homeFragment, MainActivity.TAG_HOME);
+        }
     }
 
     @Override

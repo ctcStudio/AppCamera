@@ -131,4 +131,9 @@ public class CameraFragment extends BaseFragment {
     public int getLayoutId() {
         return R.layout.fragment_camera;
     }
+
+    @Override
+    public void handleMessageClient(MessageClient messageClient) {
+
+    }
 }

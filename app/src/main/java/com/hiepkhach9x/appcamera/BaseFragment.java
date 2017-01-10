@@ -9,6 +9,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.hiepkhach9x.appcamera.entities.MessageClient;
+
 /**
  * Created by hungh on 1/4/2017.
  */
@@ -16,6 +18,7 @@ import android.view.ViewGroup;
 public abstract class BaseFragment extends Fragment {
 
     protected NavigateManager mNavigateManager;
+    protected LoginClient mLoginClient;
     private ProgressDialog mDialog;
 
     @Override
@@ -23,6 +26,10 @@ public abstract class BaseFragment extends Fragment {
         super.onAttach(context);
         if (context instanceof NavigateManager) {
             mNavigateManager = (NavigateManager) context;
+        }
+
+        if (context instanceof LoginClient) {
+            mLoginClient = (LoginClient) context;
         }
     }
 
@@ -33,6 +40,8 @@ public abstract class BaseFragment extends Fragment {
     }
 
     public abstract int getLayoutId();
+
+    public abstract void handleMessageClient(MessageClient messageClient);
 
     public void showDialog() {
         if (!isAdded()) {

@@ -10,12 +10,9 @@ import android.widget.ExpandableListView;
 import android.widget.Toast;
 
 import com.hiepkhach9x.appcamera.adapter.DeviceAdapter;
-import com.hiepkhach9x.appcamera.connection.Client;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
-import com.hiepkhach9x.appcamera.connection.listener.IMessageListener;
 import com.hiepkhach9x.appcamera.entities.Device;
 import com.hiepkhach9x.appcamera.entities.MessageClient;
-import com.hiepkhach9x.appcamera.preference.UserPref;
 
 import java.util.ArrayList;
 import java.util.Timer;
@@ -27,7 +24,6 @@ import java.util.TimerTask;
 
 public class HomeFragment extends BaseFragment {
     private static final String ARGS_DEVICES = "args.devices";
-    private final String TAG_LOGIN_LISTENER = "frgHome_login_listener";
 
     public static HomeFragment newInstance(ArrayList<Device> devices) {
         Bundle args = new Bundle();
@@ -38,34 +34,7 @@ public class HomeFragment extends BaseFragment {
     }
 
     private ArrayList<Device> mDevices;
-    private Client mClient;
     private MessageParser mMessageParser;
-    private IMessageListener iLoginMessageListener = new IMessageListener() {
-        @Override
-        public String getLsTag() {
-            return TAG_LOGIN_LISTENER;
-        }
-
-        @Override
-        public void handleMessage(MessageClient messageClient) {
-            if (messageClient.isCheckOnline()) {
-                Log.d("HungHN","online: "  + messageClient.getDataToString());
-                final ArrayList<String> listOnline = mMessageParser.parseIdOnline(messageClient.getDataToString());
-                Activity activity = getActivity();
-                if (activity != null) {
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            updateDeviceOnline(listOnline);
-                            if (deviceAdapter != null) {
-                                deviceAdapter.notifyDataSetChanged();
-                            }
-                        }
-                    });
-                }
-            }
-        }
-    };
 
     private void updateDeviceOnline(ArrayList<String> listOnline) {
         if ((listOnline != null && !listOnline.isEmpty())
@@ -122,12 +91,12 @@ public class HomeFragment extends BaseFragment {
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                 Device.Camera camera = mDevices.get(groupPosition).getCameras().get(childPosition);
                 CameraFragment cameraFragment = CameraFragment.newInstance(camera);
-                if(!camera.isOnline()) {
-                    Toast.makeText(getContext(),"Camera is offline!",Toast.LENGTH_SHORT).show();
+                if (!camera.isOnline()) {
+                    Toast.makeText(getContext(), "Camera is offline!", Toast.LENGTH_SHORT).show();
                     return false;
                 }
-                if(mNavigateManager !=null) {
-                    mNavigateManager.addPage(cameraFragment,MainActivity.TAG_CAMERA);
+                if (mNavigateManager != null) {
+                    mNavigateManager.addPage(cameraFragment, MainActivity.TAG_CAMERA);
                 }
                 return true;
             }
@@ -142,42 +111,17 @@ public class HomeFragment extends BaseFragment {
             mTimer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    if (mClient != null) {
-                        mClient.sendCheckOnlineMessage(mMessageParser.genMessageCheckOnline(getListCameraIdFromDevice()));
+                    if (mLoginClient != null && mLoginClient.isClientAlive()) {
+                        mLoginClient.sendCheckOnline(getListCameraIdFromDevice());
                     }
                 }
-            }, 5000, 5000);
+            }, 10000, 20000);
         }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        initClient();
-    }
-
-    private void initClient() {
-        final String serverAddress = UserPref.getInstance().getServerAddress();
-        final String userName = UserPref.getInstance().getUserName();
-        final String password = UserPref.getInstance().getPassword();
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (mClient != null) {
-                        mClient.dispose();
-                        mClient = null;
-                    }
-                    mClient = new Client(serverAddress);
-                    mClient.addIMessageListener(iLoginMessageListener);
-                    new Thread().sleep(100);
-                    mClient.sendLoginMessage(mMessageParser.genMessageLogin(userName, password));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        new Thread(runnable).start();
     }
 
     private ArrayList<String> getListCameraIdFromDevice() {
@@ -201,14 +145,30 @@ public class HomeFragment extends BaseFragment {
         if (mTimer != null) {
             mTimer.cancel();
         }
-        if (mClient != null) {
-            mClient.dispose();
-            mClient = null;
-        }
     }
 
     @Override
     public int getLayoutId() {
         return R.layout.fragment_home;
+    }
+
+    @Override
+    public void handleMessageClient(MessageClient messageClient) {
+        if (messageClient.isCheckOnline()) {
+            Log.d("HungHN", "online: " + messageClient.getDataToString());
+            final ArrayList<String> listOnline = mMessageParser.parseIdOnline(messageClient.getDataToString());
+            Activity activity = getActivity();
+            if (activity != null) {
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateDeviceOnline(listOnline);
+                        if (deviceAdapter != null) {
+                            deviceAdapter.notifyDataSetChanged();
+                        }
+                    }
+                });
+            }
+        }
     }
 }
