@@ -13,10 +13,9 @@ import com.hiepkhach9x.appcamera.connection.Client;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
 import com.hiepkhach9x.appcamera.connection.listener.IMessageListener;
 import com.hiepkhach9x.appcamera.entities.Device;
-import com.hiepkhach9x.appcamera.entities.Message;
+import com.hiepkhach9x.appcamera.entities.MessageClient;
 import com.hiepkhach9x.appcamera.preference.UserPref;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -40,28 +39,29 @@ public class LoginFragment extends BaseFragment {
 
     private IMessageListener iLoginMessageListener = new IMessageListener() {
         @Override
-        public String getTag() {
+        public String getLsTag() {
             return TAG_LOGIN_LISTENER;
         }
 
         @Override
-        public void handleMessage(Message message) {
-            if (message.isLoginType()) {
-                String data = message.getDataToString();
+        public void handleMessage(MessageClient messageClient) {
+            Log.d("HungHN",messageClient.getDataToString());
+            if (messageClient.isLoginType()) {
+                String data = messageClient.getDataToString();
                 if (data.contains("ketthuckhoitaohethong")) {
                     Log.d("HungHN", "finish receive data login");
 
                     if (mClient != null)
                         mClient.sendCheckOnlineMessage(messageParser.genMessageCheckOnline(getListCameraIdFromDevice()));
                 } else if (data.contains("cameralistbegin")) {
-                    devices = messageParser.parseDevice(message.getDataToString());
+                    devices = messageParser.parseDevice(messageClient.getDataToString());
                 } else if (data.contains("khoitaohethong")) {
                     Log.d("HungHN", "start receive data login");
                 }
             }
 
-            if (message.isCheckOnline()) {
-                ArrayList<String> listOnline = messageParser.parseIdOnline(message.getDataToString());
+            if (messageClient.isCheckOnline()) {
+                ArrayList<String> listOnline = messageParser.parseIdOnline(messageClient.getDataToString());
                 updateDeviceOnline(listOnline);
                 dismissDialog();
                 HomeFragment homeFragment = HomeFragment.newInstance(devices);

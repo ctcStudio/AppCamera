@@ -5,13 +5,13 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.view.View;
-import android.widget.ImageView;
 
 import com.hiepkhach9x.appcamera.connection.Client;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
 import com.hiepkhach9x.appcamera.connection.listener.IMessageListener;
+import com.hiepkhach9x.appcamera.customview.CameraView;
 import com.hiepkhach9x.appcamera.entities.Device;
-import com.hiepkhach9x.appcamera.entities.Message;
+import com.hiepkhach9x.appcamera.entities.MessageClient;
 import com.hiepkhach9x.appcamera.entities.RealTime;
 import com.hiepkhach9x.appcamera.preference.UserPref;
 
@@ -37,18 +37,18 @@ public class CameraFragment extends BaseFragment {
 
     private Client mClient;
     private MessageParser mMessageParser;
-    private ImageView mImageCamera;
+    private CameraView mImageCamera;
 
     private IMessageListener iRealTimeMessage = new IMessageListener() {
         @Override
-        public String getTag() {
+        public String getLsTag() {
             return TAG_CAMERA_LISTENER;
         }
 
         @Override
-        public void handleMessage(Message message) {
-            if(message.isRealTime()) {
-                final RealTime realTime = mMessageParser.parseRealTimeMessage(message);
+        public void handleMessage(MessageClient messageClient) {
+            if(messageClient.isRealTime()) {
+                final RealTime realTime = mMessageParser.parseRealTimeMessage(messageClient);
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
@@ -81,24 +81,38 @@ public class CameraFragment extends BaseFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mImageCamera = (ImageView) view.findViewById(R.id.img_camera);
+        mImageCamera = (CameraView) view.findViewById(R.id.img_camera);
+        mImageCamera.setCameraId(camera.getCameraId());
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if (camera != null) {
-            initClient();
-        }
+//        if (camera != null) {
+//            initClient();
+//        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if(mImageCamera.sendRealTimeMessage()) {
+                    try {
+                        new Thread().sleep(400);
+                        mImageCamera.sendRealTimeMessage();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if(mClient!=null) {
-            mClient.dispose();
-            mClient = null;
-        }
+//        if(mClient!=null) {
+//            mClient.dispose();
+//            mClient = null;
+//        }
     }
 
     private void initClient() {

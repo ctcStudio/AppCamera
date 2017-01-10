@@ -1,12 +1,11 @@
 package com.hiepkhach9x.appcamera.connection;
 
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.hiepkhach9x.appcamera.Config;
 import com.hiepkhach9x.appcamera.connection.listener.IClient;
 import com.hiepkhach9x.appcamera.connection.listener.IMessageListener;
-import com.hiepkhach9x.appcamera.entities.Message;
+import com.hiepkhach9x.appcamera.entities.MessageClient;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -71,7 +70,7 @@ public class Client implements IClient {
     @Override
     public boolean sendCheckOnlineMessage(String msg) {
         mCurrentType = MessageType.ONLINE;
-        //String msg = "@message@checkonline@message@////1600000000000020////1500000000010001////1600000000000025////1600000000000026////";
+        //String msg = "@messageClient@checkonline@messageClient@////1600000000000020////1500000000010001////1600000000000025////1600000000000026////";
         return sendMessage(msg);
     }
 
@@ -85,7 +84,7 @@ public class Client implements IClient {
     @Override
     public boolean sendGetReadTimeIdMessage(String msg) {
         mCurrentType = MessageType.REALTIME;
-        //String msg = "@message@yeucaulive@message@////1600000000000025////";
+        //String msg = "@messageClient@yeucaulive@messageClient@////1600000000000025////";
         return sendMessage(msg);
     }
 
@@ -126,7 +125,7 @@ public class Client implements IClient {
         Iterator<IMessageListener> iterator = listenerList.iterator();
         while (iterator.hasNext()) {
             IMessageListener listener = iterator.next();
-            if (listener.getTag().equalsIgnoreCase(messageListener.getTag())) {
+            if (listener.getLsTag().equalsIgnoreCase(messageListener.getLsTag())) {
                 iterator.remove();
             }
         }
@@ -157,27 +156,27 @@ public class Client implements IClient {
                 if (dataResult == null || dataResult.length < 1) {
                     continue;
                 }
-                Message message = new Message();
-                message.setMessageType(mCurrentType);
-                message.setData(dataResult);
+                MessageClient messageClient = new MessageClient();
+                messageClient.setMessageType(mCurrentType);
+                messageClient.setData(dataResult);
                 for (IMessageListener messageListener : listenerList) {
-                    Deliver deliver = new Deliver(message, messageListener);
+                    Deliver deliver = new Deliver(messageClient, messageListener);
                     deliver.start();
                 }
             }
         }
 
         class Deliver extends Thread {
-            Message message;
+            MessageClient messageClient;
             IMessageListener listener;
 
-            public Deliver(Message message, IMessageListener listener) {
-                this.message = message;
+            public Deliver(MessageClient messageClient, IMessageListener listener) {
+                this.messageClient = messageClient;
                 this.listener = listener;
             }
 
             public void run() {
-                this.listener.handleMessage(message);
+                this.listener.handleMessage(messageClient);
             }
         }
     }

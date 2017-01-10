@@ -6,7 +6,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.hiepkhach9x.appcamera.entities.Device;
-import com.hiepkhach9x.appcamera.entities.Message;
+import com.hiepkhach9x.appcamera.entities.MessageClient;
 import com.hiepkhach9x.appcamera.entities.RealTime;
 import com.hiepkhach9x.appcamera.util.BitConverter;
 
@@ -86,12 +86,12 @@ public class MessageParser {
         return null;
     }
 
-    public RealTime parseRealTimeMessage(Message message) {
-        if (!message.isRealTime()) {
+    public RealTime parseRealTimeMessage(MessageClient messageClient) {
+        if (!messageClient.isRealTime()) {
             return null;
         }
 
-        byte[] bytes = message.getData();
+        byte[] bytes = messageClient.getData();
         int beginPic = 0;
         int endPic = 0;
         for (int i = 0; i < bytes.length - 1; i++) {
@@ -130,7 +130,7 @@ public class MessageParser {
     }
 
     public String genMessageCheckOnline(ArrayList<String> listId) {
-        StringBuilder builder = new StringBuilder("@message@checkonline@message@////");
+        StringBuilder builder = new StringBuilder("@messageClient@checkonline@messageClient@////");
         for (String id : listId) {
             builder.append(id + SPERATER1);
         }
@@ -146,6 +146,6 @@ public class MessageParser {
     }
 
     public String genMessageRealTime(String cameraId) {
-        return "@message@yeucaulive@message@" + SPERATER1 + cameraId + SPERATER1;
+        return "@messageClient@yeucaulive@messageClient@" + SPERATER1 + cameraId + SPERATER1;
     }
 }

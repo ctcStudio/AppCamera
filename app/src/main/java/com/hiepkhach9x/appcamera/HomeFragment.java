@@ -2,8 +2,6 @@ package com.hiepkhach9x.appcamera;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -16,7 +14,7 @@ import com.hiepkhach9x.appcamera.connection.Client;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
 import com.hiepkhach9x.appcamera.connection.listener.IMessageListener;
 import com.hiepkhach9x.appcamera.entities.Device;
-import com.hiepkhach9x.appcamera.entities.Message;
+import com.hiepkhach9x.appcamera.entities.MessageClient;
 import com.hiepkhach9x.appcamera.preference.UserPref;
 
 import java.util.ArrayList;
@@ -44,14 +42,15 @@ public class HomeFragment extends BaseFragment {
     private MessageParser mMessageParser;
     private IMessageListener iLoginMessageListener = new IMessageListener() {
         @Override
-        public String getTag() {
+        public String getLsTag() {
             return TAG_LOGIN_LISTENER;
         }
 
         @Override
-        public void handleMessage(Message message) {
-            if (message.isCheckOnline()) {
-                final ArrayList<String> listOnline = mMessageParser.parseIdOnline(message.getDataToString());
+        public void handleMessage(MessageClient messageClient) {
+            if (messageClient.isCheckOnline()) {
+                Log.d("HungHN","online: "  + messageClient.getDataToString());
+                final ArrayList<String> listOnline = mMessageParser.parseIdOnline(messageClient.getDataToString());
                 Activity activity = getActivity();
                 if (activity != null) {
                     activity.runOnUiThread(new Runnable() {

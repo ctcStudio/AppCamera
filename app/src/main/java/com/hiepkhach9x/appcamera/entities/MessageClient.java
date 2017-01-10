@@ -6,11 +6,11 @@ import com.hiepkhach9x.appcamera.connection.MessageType;
  * Created by hungh on 1/4/2017.
  */
 
-public class Message {
+public class MessageClient {
     private MessageType messageType;
     private byte[] data;
 
-    public Message() {
+    public MessageClient() {
     }
 
     public MessageType getMessageType() {

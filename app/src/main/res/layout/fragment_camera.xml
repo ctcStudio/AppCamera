@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-    <ImageView
+    <com.hiepkhach9x.appcamera.customview.CameraView
         android:id="@+id/img_camera"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
