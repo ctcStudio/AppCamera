@@ -146,7 +146,7 @@ public class HomeFragment extends BaseFragment {
                         mClient.sendCheckOnlineMessage(mMessageParser.genMessageCheckOnline(getListCameraIdFromDevice()));
                     }
                 }
-            }, 20000, 20000);
+            }, 5000, 5000);
         }
     }
 

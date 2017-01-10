@@ -91,19 +91,6 @@ public class CameraFragment extends BaseFragment {
 //        if (camera != null) {
 //            initClient();
 //        }
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                if(mImageCamera.sendRealTimeMessage()) {
-                    try {
-                        new Thread().sleep(400);
-                        mImageCamera.sendRealTimeMessage();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
     }
 
     @Override

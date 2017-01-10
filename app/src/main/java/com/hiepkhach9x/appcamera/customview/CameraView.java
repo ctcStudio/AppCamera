@@ -29,9 +29,11 @@ public class CameraView extends ImageView implements IMessageListener {
         public boolean handleMessage(android.os.Message message) {
             switch (message.what) {
                 case ARGS_WHAT_REAL_TIME:
-                    if(message.obj instanceof RealTime) {
+                    if (message.obj instanceof RealTime) {
                         RealTime realTime = (RealTime) message.obj;
-                        setImageBitmap(realTime.getPictureData());
+                        if (realTime != null && realTime.getPictureData() != null) {
+                            setImageBitmap(realTime.getPictureData());
+                        }
                     }
                     return true;
                 default:
@@ -42,37 +44,21 @@ public class CameraView extends ImageView implements IMessageListener {
 
     public CameraView(Context context) {
         super(context);
-        parser = new MessageParser();
-        initClient();
     }
 
     public CameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        isConnectSuccess = true;
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        parser = new MessageParser();
         initClient();
     }
 
-    private void initClient() {
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                if (mClient != null) {
-                    mClient.dispose();
-                    mClient = null;
-                }
-                UserPref userPref = UserPref.getInstance();
-                mClient = new Client(userPref.getServerAddress());
-                mClient.addIMessageListener(CameraView.this);
-                try {
-                    new Thread().sleep(200);
-                    String msg = parser.genLoginRealTime(userPref.getUserName(), userPref.getPassword());
-                    mClient.sendLoginReadTimeMessage(msg);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        new Thread(runnable).start();
+    public void initClient() {
+        new RealTimeThread().start();
     }
 
     @Override
@@ -85,7 +71,7 @@ public class CameraView extends ImageView implements IMessageListener {
     }
 
     public boolean sendRealTimeMessage() {
-        if(isConnectSuccess && !TextUtils.isEmpty(cameraId)) {
+        if (isConnectSuccess && !TextUtils.isEmpty(cameraId)) {
             String msg = parser.genMessageRealTime(cameraId);
             return mClient.sendGetReadTimeIdMessage(msg);
         }
@@ -99,8 +85,8 @@ public class CameraView extends ImageView implements IMessageListener {
 
     @Override
     public void handleMessage(MessageClient messageClient) {
-        if(messageClient.isLoginRealTime()) {
-            if(!TextUtils.isEmpty(messageClient.getDataToString())){
+        if (messageClient.isLoginRealTime()) {
+            if (!TextUtils.isEmpty(messageClient.getDataToString())) {
                 isConnectSuccess = false;
             }
         } else if (messageClient.isRealTime()) {
@@ -114,5 +100,29 @@ public class CameraView extends ImageView implements IMessageListener {
 
     public void setCameraId(String cameraId) {
         this.cameraId = cameraId;
+    }
+
+    class RealTimeThread extends Thread {
+        @Override
+        public void run() {
+            super.run();
+            if (mClient != null) {
+                mClient.dispose();
+                mClient = null;
+            }
+            UserPref userPref = UserPref.getInstance();
+            mClient = new Client(userPref.getServerAddress());
+            mClient.addIMessageListener(CameraView.this);
+            try {
+                sleep(200);
+                String msg = parser.genLoginRealTime(userPref.getUserName(), userPref.getPassword());
+                mClient.sendLoginReadTimeMessage(msg);
+                isConnectSuccess = true;
+                sleep(2000);
+                sendRealTimeMessage();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

@@ -98,22 +98,24 @@ public class MessageParser {
             if (((bytes[i] == (byte) 0xFF)
                     && (bytes[i + 1] == (byte) 0xD8))) {
                 beginPic = i;
-                Log.d("HungHN", "BeginPic: " + beginPic);
             }
 
             if (((bytes[i] == (byte) 0xFF)
                     && (bytes[i + 1] == (byte) 0xD9))) {
                 endPic = i + 1;
-                Log.d("HungHN", "EndPic: " + endPic);
                 break;
             }
         }
         if (endPic - beginPic > 100) {
             byte[] gpsBytes = Arrays.copyOf(bytes, beginPic);
             String gpsAll = new String(gpsBytes).trim();
+            Log.d("HungHN", "gps: " + gpsAll);
             int startGps = gpsAll.indexOf(KEY_GPS) + KEY_GPS.length();
             int endGps = gpsAll.lastIndexOf(KEY_GPS);
-            String gps = gpsAll.substring(startGps, endGps);
+            String gps = "";
+            if(startGps < endGps) {
+                gps = gpsAll.substring(startGps, endGps);
+            }
             byte[] pic = Arrays.copyOfRange(bytes, beginPic, endPic);
             BitmapFactory.Options options = new BitmapFactory.Options();
             Bitmap bitmap = BitmapFactory.decodeByteArray(pic, 0, pic.length, options);
@@ -130,7 +132,7 @@ public class MessageParser {
     }
 
     public String genMessageCheckOnline(ArrayList<String> listId) {
-        StringBuilder builder = new StringBuilder("@messageClient@checkonline@messageClient@////");
+        StringBuilder builder = new StringBuilder("@message@checkonline@message@////");
         for (String id : listId) {
             builder.append(id + SPERATER1);
         }
@@ -146,6 +148,6 @@ public class MessageParser {
     }
 
     public String genMessageRealTime(String cameraId) {
-        return "@messageClient@yeucaulive@messageClient@" + SPERATER1 + cameraId + SPERATER1;
+        return "@message@yeucaulive@message@" + SPERATER1 + cameraId + SPERATER1;
     }
 }

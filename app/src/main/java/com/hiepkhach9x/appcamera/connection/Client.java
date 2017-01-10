@@ -10,6 +10,7 @@ import com.hiepkhach9x.appcamera.entities.MessageClient;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -22,8 +23,8 @@ import java.util.List;
 public class Client implements IClient {
     private final String TAG = "Client";
     private Socket mSocket;
-    private InputStream stream;
-    private OutputStreamWriter streamWriter;
+    private InputStream inputStream;
+    private OutputStream outputStream;
     private ReadSocketThread socketThread;
     private List<IMessageListener> listenerList;
     private MessageType mCurrentType;
@@ -34,8 +35,8 @@ public class Client implements IClient {
             mSocket = new Socket(sever, Config.SERVER_PORT);
             mSocket.setSoTimeout(Config.SOCKET_TIMOUT);
 
-            stream = mSocket.getInputStream();
-            streamWriter = new OutputStreamWriter(mSocket.getOutputStream(), "UTF-8");
+            inputStream = mSocket.getInputStream();
+            outputStream = mSocket.getOutputStream();
             socketThread = new ReadSocketThread();
             socketThread.start();
             listenerList = new ArrayList<>();
@@ -50,8 +51,9 @@ public class Client implements IClient {
     public boolean sendMessage(String message) {
         if (mSocket != null) {
             try {
-                streamWriter.write(message);
-                streamWriter.flush();
+                byte[] data = message.getBytes();
+                outputStream.write(data);
+                outputStream.flush();
                 return true;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -144,7 +146,7 @@ public class Client implements IClient {
                 byte[] dataResult = null;
                 try {
                     byte[] buffer = new byte[1024];
-                    int length = stream.read(buffer);
+                    int length = inputStream.read(buffer);
                     if (length != -1) {
                         result.write(buffer, 0, length);
                     }

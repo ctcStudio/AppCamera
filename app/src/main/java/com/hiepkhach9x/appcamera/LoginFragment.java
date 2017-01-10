@@ -70,6 +70,7 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
             }
 
             if (messageClient.isCheckOnline()) {
+                Log.d("HungHN","Check online: " + messageClient.getDataToString());
                 ArrayList<String> listOnline = messageParser.parseIdOnline(messageClient.getDataToString());
                 updateDeviceOnline(listOnline);
                 dismissDialog();
@@ -79,11 +80,9 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
                         viewLayout();
                     }
                 });
-                /*
                 HomeFragment homeFragment = HomeFragment.newInstance(devices);
                 if (mNavigateManager != null)
                     mNavigateManager.swapPage(homeFragment, MainActivity.TAG_HOME);
-                */
             }
         }
     };
