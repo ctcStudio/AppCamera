@@ -212,9 +212,9 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
                     viewLayout();
                 }
             });
-            HomeFragment homeFragment = HomeFragment.newInstance(devices);
-            if (mNavigateManager != null)
-                mNavigateManager.swapPage(homeFragment, MainActivity.TAG_HOME);
+//            HomeFragment homeFragment = HomeFragment.newInstance(devices);
+//            if (mNavigateManager != null)
+//                mNavigateManager.swapPage(homeFragment, MainActivity.TAG_HOME);
         }
     }
 

@@ -1,7 +1,11 @@
 package com.hiepkhach9x.appcamera.customview;
 
 import android.content.Context;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Handler;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.widget.ImageView;
@@ -32,7 +36,12 @@ public class CameraView extends ImageView implements IMessageListener {
                     if (message.obj instanceof RealTime) {
                         RealTime realTime = (RealTime) message.obj;
                         if (realTime != null && realTime.getPictureData() != null) {
-                            setImageBitmap(realTime.getPictureData());
+                            Drawable drawable = new BitmapDrawable(getResources(), realTime.getPictureData());
+                            if (Build.VERSION.SDK_INT > 16) {
+                                setBackground(drawable);
+                            } else {
+                                setBackgroundDrawable(drawable);
+                            }
                         }
                     }
                     return true;
@@ -48,6 +57,13 @@ public class CameraView extends ImageView implements IMessageListener {
 
     public CameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int width = getMeasuredWidth();
+        setMeasuredDimension(width, width);
     }
 
     @Override

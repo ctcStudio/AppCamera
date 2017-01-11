@@ -48,7 +48,7 @@ public class Client implements IClient {
     }
 
     @Override
-    public boolean sendMessage(String message) {
+    public synchronized boolean sendMessage(String message) {
         if (mSocket != null) {
             try {
                 byte[] data = message.getBytes();
@@ -63,35 +63,35 @@ public class Client implements IClient {
     }
 
     @Override
-    public boolean sendLoginMessage(String msg) {
+    public synchronized boolean sendLoginMessage(String msg) {
         mCurrentType = MessageType.LOGIN;
         //String msg = "@haicuong@:" + userName + ":" + pass;
         return sendMessage(msg);
     }
 
     @Override
-    public boolean sendCheckOnlineMessage(String msg) {
+    public synchronized boolean sendCheckOnlineMessage(String msg) {
         mCurrentType = MessageType.ONLINE;
         //String msg = "@messageClient@checkonline@messageClient@////1600000000000020////1500000000010001////1600000000000025////1600000000000026////";
         return sendMessage(msg);
     }
 
     @Override
-    public boolean sendLoginReadTimeMessage(String msg) {
+    public synchronized boolean sendLoginReadTimeMessage(String msg) {
         mCurrentType = MessageType.LOGIN_REALTIME;
         //String msg = "@haicuongplayer@:demo:123456";
         return sendMessage(msg);
     }
 
     @Override
-    public boolean sendGetReadTimeIdMessage(String msg) {
+    public synchronized boolean sendGetReadTimeIdMessage(String msg) {
         mCurrentType = MessageType.REALTIME;
         //String msg = "@messageClient@yeucaulive@messageClient@////1600000000000025////";
         return sendMessage(msg);
     }
 
     @Override
-    public boolean sendGetDataMessage(String msg) {
+    public synchronized boolean sendGetDataMessage(String msg) {
         mCurrentType = MessageType.GETDATA;
         return sendMessage(msg);
     }
@@ -109,7 +109,6 @@ public class Client implements IClient {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        Log.d(TAG,"Client is closed!");
     }
 
     @Override
