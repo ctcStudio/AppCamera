@@ -2,8 +2,11 @@ package com.hiepkhach9x.appcamera;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
+import com.hiepkhach9x.appcamera.adapter.ListCameraAdapter;
 import com.hiepkhach9x.appcamera.entities.MessageClient;
 
 import java.util.ArrayList;
@@ -26,6 +29,8 @@ public class ListCameraFragment extends BaseFragment {
     }
 
     private ArrayList<String> listCamera;
+    private RecyclerView mRecyclerView;
+    private ListCameraAdapter cameraAdapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -34,6 +39,9 @@ public class ListCameraFragment extends BaseFragment {
             listCamera = savedInstanceState.getStringArrayList(ARGS_LIST_CAMERA);
         } else if (getArguments() != null) {
             listCamera = getArguments().getStringArrayList(ARGS_LIST_CAMERA);
+        }
+        if(listCamera == null) {
+            listCamera = new ArrayList<>();
         }
     }
 
@@ -46,6 +54,12 @@ public class ListCameraFragment extends BaseFragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mRecyclerView = (RecyclerView) view.findViewById(R.id.list_camera);
+        cameraAdapter = new ListCameraAdapter(getContext(),listCamera);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setAdapter(cameraAdapter);
     }
 
     @Override

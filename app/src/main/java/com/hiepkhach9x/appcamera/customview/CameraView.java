@@ -71,7 +71,7 @@ public class CameraView extends ImageView implements IMessageListener {
     }
 
     public boolean sendRealTimeMessage() {
-        if (isConnectSuccess && !TextUtils.isEmpty(cameraId)) {
+        if (mClient != null && isConnectSuccess && !TextUtils.isEmpty(cameraId)) {
             String msg = parser.genMessageRealTime(cameraId);
             return mClient.sendGetReadTimeIdMessage(msg);
         }

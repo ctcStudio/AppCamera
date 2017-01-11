@@ -40,6 +40,7 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
     private boolean hasLogin;
 
     private ArrayList<Device> devices;
+    private ArrayList<String> listCamOnline;
     private MessageParser messageParser = new MessageParser();
 
     private void viewLayout() {
@@ -186,6 +187,9 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
     @Override
     public void handleMessageClient(MessageClient messageClient) {
         Log.d("HungHN", messageClient.getDataToString());
+        if(TextUtils.isEmpty(messageClient.getDataToString())) {
+            return;
+        }
         if (messageClient.isLoginType()) {
             String data = messageClient.getDataToString();
             if (data.contains("ketthuckhoitaohethong")) {
@@ -199,8 +203,8 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
         }
 
         if (messageClient.isCheckOnline()) {
-            ArrayList<String> listOnline = messageParser.parseIdOnline(messageClient.getDataToString());
-            updateDeviceOnline(listOnline);
+            listCamOnline = messageParser.parseIdOnline(messageClient.getDataToString());
+            updateDeviceOnline(listCamOnline);
             dismissDialog();
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
@@ -218,6 +222,10 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.view_all:
+                ListCameraFragment cameraFragment = ListCameraFragment.newInstance(listCamOnline);
+                if(mNavigateManager!=null) {
+                    mNavigateManager.addPage(cameraFragment,MainActivity.TAG_CAMERA);
+                }
                 break;
             case R.id.view_favorites:
                 break;
