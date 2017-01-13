@@ -19,8 +19,6 @@ import com.hiepkhach9x.appcamera.entities.MessageClient;
 import com.hiepkhach9x.appcamera.preference.UserPref;
 
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Created by hungh on 1/4/2017.
@@ -122,13 +120,13 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
                 userPref.saveServerAddress(serverAddress);
                 userPref.saveUserName(userName);
                 userPref.savePassword(password);
-                showDialog();
                 login();
             }
         });
 
-        edUserName.setText("demo");
-        edPassword.setText("123456");
+        UserPref userPref = UserPref.getInstance();
+        edUserName.setText(userPref.getUserName());
+        edPassword.setText(userPref.getPassword());
     }
 
     @Override
@@ -162,6 +160,12 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
     }
 
     private void login() {
+        if (mNavigateManager != null) {
+            if (!mNavigateManager.checkNetworkConnected()) {
+                return;
+            }
+        }
+        showDialog();
         final UserPref userPref = UserPref.getInstance();
         userPref.saveServerAddress(serverAddress);
         userPref.saveUserName(userName);
@@ -254,6 +258,9 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
 
     @Override
     public void onClick(View view) {
+        if (mNavigateManager != null && !mNavigateManager.checkNetworkConnected()) {
+            return;
+        }
         switch (view.getId()) {
             case R.id.view_all:
                 if (mLoginClient != null && mLoginClient.isClientAlive())
@@ -268,5 +275,10 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
 
                 break;
         }
+    }
+
+    public void switchToLogin() {
+        hasLogin = false;
+        viewLayout();
     }
 }

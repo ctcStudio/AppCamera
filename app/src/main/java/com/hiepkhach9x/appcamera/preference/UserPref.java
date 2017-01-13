@@ -51,7 +51,7 @@ public class UserPref {
     }
 
     public String getUserName() {
-        return mSharedPreferences.getString(KEY_USER_NAME, "");
+        return mSharedPreferences.getString(KEY_USER_NAME, "demo");
     }
 
     public boolean savePassword(String address) {
@@ -59,7 +59,7 @@ public class UserPref {
     }
 
     public String getPassword() {
-        return mSharedPreferences.getString(KEY_PASSWORD, "");
+        return mSharedPreferences.getString(KEY_PASSWORD, "123456");
     }
 
     public boolean saveListCameraFavorite(ArrayList<String> cameraList) {

@@ -28,7 +28,6 @@ public class Client implements IClient {
     private ReadSocketThread socketThread;
     private List<IMessageListener> listenerList;
     private MessageType mCurrentType;
-    private MessageParser mMessageParser;
 
     public Client(String sever) {
         try {
@@ -39,17 +38,17 @@ public class Client implements IClient {
             outputStream = mSocket.getOutputStream();
             socketThread = new ReadSocketThread();
             socketThread.start();
-            listenerList = new ArrayList<>();
-            mCurrentType = MessageType.LOGIN;
-            mMessageParser = new MessageParser();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        listenerList = new ArrayList<>();
+        mCurrentType = MessageType.LOGIN;
     }
 
     @Override
     public synchronized boolean sendMessage(String message) {
-        Log.d("HungHN","send message: " + message);
+        Log.d("HungHN", "send message: " + message);
         if (mSocket != null) {
             try {
                 byte[] data = message.getBytes();
@@ -114,6 +113,9 @@ public class Client implements IClient {
 
     @Override
     public void addIMessageListener(IMessageListener messageListener) {
+        if (listenerList == null) {
+            listenerList = new ArrayList<>();
+        }
         if (messageListener != null) {
             listenerList.add(messageListener);
         }
