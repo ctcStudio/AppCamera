@@ -6,14 +6,10 @@
     <string name="select_server_collection">Select server collection</string>
 
     <string-array name="server_collections">
-        <item>Server 1</item>
-        <item>Server 2</item>
-        <item>Server 3</item>
+        <item>haicuong.no-ip.biz</item>
     </string-array>
 
     <string-array name="server_address">
-        <item>haicuong.no-ip.biz</item>
-        <item>haicuong.no-ip.biz</item>
         <item>haicuong.no-ip.biz</item>
     </string-array>
 </resources>

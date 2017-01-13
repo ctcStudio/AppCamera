@@ -19,9 +19,9 @@ import java.util.Arrays;
 
 public class MessageParser {
 
-    private final String SPERATER1 = "////";
-    private final String NEW_LINE = "\n";
-    private final String KEY_GPS = "<GPS>";
+    public static final String SPERATER1 = "////";
+    public static final String NEW_LINE = "\n";
+    public static final String KEY_GPS = "<GPS>";
 
     public MessageParser() {
     }

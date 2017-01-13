@@ -49,6 +49,7 @@ public class Client implements IClient {
 
     @Override
     public synchronized boolean sendMessage(String message) {
+        Log.d("HungHN","send message: " + message);
         if (mSocket != null) {
             try {
                 byte[] data = message.getBytes();

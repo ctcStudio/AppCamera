@@ -19,6 +19,8 @@ import com.hiepkhach9x.appcamera.entities.MessageClient;
 import com.hiepkhach9x.appcamera.preference.UserPref;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by hungh on 1/4/2017.
@@ -42,6 +44,8 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
     private ArrayList<Device> devices;
     private ArrayList<String> listCamOnline;
     private MessageParser messageParser = new MessageParser();
+
+    //private Timer mTimer;
 
     private void viewLayout() {
         if (hasLogin) {
@@ -151,6 +155,10 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+//        if (mTimer != null) {
+//            mTimer.cancel();
+//            mTimer = null;
+//        }
     }
 
     private void login() {
@@ -185,17 +193,25 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
     public void handleMessageClient(MessageClient messageClient) {
         Log.d("HungHN", messageClient.getDataToString());
-        if(TextUtils.isEmpty(messageClient.getDataToString())) {
-            return;
-        }
         if (messageClient.isLoginType()) {
             String data = messageClient.getDataToString();
             if (data.contains("ketthuckhoitaohethong")) {
                 hasLogin = true;
-                if (mLoginClient != null && mLoginClient.isClientAlive())
-                    mLoginClient.sendCheckOnline(getListCameraIdFromDevice());
+                dismissDialog();
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        viewLayout();
+                        //startTimer();
+                    }
+                });
             } else if (data.contains("cameralistbegin")) {
                 devices = messageParser.parseDevice(messageClient.getDataToString());
             } else if (data.contains("khoitaohethong")) {
@@ -203,31 +219,53 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
         }
 
         if (messageClient.isCheckOnline()) {
+            if (TextUtils.isEmpty(messageClient.getDataToString())) {
+                return;
+            }
             listCamOnline = messageParser.parseIdOnline(messageClient.getDataToString());
             updateDeviceOnline(listCamOnline);
             dismissDialog();
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    viewLayout();
-                }
-            });
+
 //            HomeFragment homeFragment = HomeFragment.newInstance(devices);
 //            if (mNavigateManager != null)
 //                mNavigateManager.swapPage(homeFragment, MainActivity.TAG_HOME);
+            ListCameraFragment cameraFragment = ListCameraFragment.newInstance(listCamOnline);
+            if (mNavigateManager != null) {
+                mNavigateManager.addPage(cameraFragment, MainActivity.TAG_CAMERA);
+            }
         }
     }
+
+//    private void startTimer() {
+//        if (mTimer != null) {
+//            mTimer.cancel();
+//            mTimer = null;
+//        }
+//        mTimer = new Timer();
+//        mTimer.schedule(new TimerTask() {
+//            @Override
+//            public void run() {
+//                if (mLoginClient != null && mLoginClient.isClientAlive()) {
+//                    mLoginClient.sendCheckOnline(getListCameraIdFromDevice());
+//                }
+//            }
+//        }, 5000, 5000);
+//    }
 
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.view_all:
-                ListCameraFragment cameraFragment = ListCameraFragment.newInstance(listCamOnline);
-                if(mNavigateManager!=null) {
-                    mNavigateManager.addPage(cameraFragment,MainActivity.TAG_CAMERA);
-                }
+                if (mLoginClient != null && mLoginClient.isClientAlive())
+                    mLoginClient.sendCheckOnline(getListCameraIdFromDevice());
                 break;
             case R.id.view_favorites:
+                ArrayList<String> listCamera = UserPref.getInstance().getListCameraFavorite();
+                if (mLoginClient != null
+                        && mLoginClient.isClientAlive()
+                        && !listCamera.isEmpty())
+                    mLoginClient.sendCheckOnline(listCamera);
+
                 break;
         }
     }

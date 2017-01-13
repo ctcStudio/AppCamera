@@ -5,11 +5,12 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
-import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.widget.ImageView;
 
+import com.hiepkhach9x.appcamera.R;
 import com.hiepkhach9x.appcamera.connection.Client;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
 import com.hiepkhach9x.appcamera.connection.listener.IMessageListener;
@@ -22,9 +23,13 @@ import com.hiepkhach9x.appcamera.preference.UserPref;
  */
 
 public class CameraView extends ImageView implements IMessageListener {
+    private static final int ARGS_WHAT_SEND_LOGIN_REAL_TIME = 121;
     private final int ARGS_WHAT_REAL_TIME = 123;
+    private static final int ARGS_WHAT_SEND_REAL_TIME = 124;
+    private static final int ARGS_WHAT_ERROR_LOGIN = 125;
 
     private Client mClient;
+    private RealTimeThread realTimeThread;
     private MessageParser parser;
     private boolean isConnectSuccess;
     private String cameraId;
@@ -45,6 +50,26 @@ public class CameraView extends ImageView implements IMessageListener {
                         }
                     }
                     return true;
+                case ARGS_WHAT_SEND_LOGIN_REAL_TIME:
+                    if (mClient != null) {
+                        UserPref userPref = UserPref.getInstance();
+                        String msg = parser.genLoginRealTime(userPref.getUserName(), userPref.getPassword());
+                        mClient.sendLoginReadTimeMessage(msg);
+                    }
+                    if (mHandler != null) {
+                        mHandler.sendEmptyMessageDelayed(ARGS_WHAT_SEND_REAL_TIME, 2000);
+                    }
+                    return true;
+                case ARGS_WHAT_SEND_REAL_TIME:
+                    if (mClient != null
+                            && !TextUtils.isEmpty(cameraId)
+                            && isConnectSuccess) {
+                        String msg = parser.genMessageRealTime(cameraId);
+                        mClient.sendGetReadTimeIdMessage(msg);
+                    }
+                    return true;
+                case ARGS_WHAT_ERROR_LOGIN:
+                    setBackgroundResource(R.drawable.ic_connect_error);
                 default:
                     return false;
             }
@@ -74,7 +99,12 @@ public class CameraView extends ImageView implements IMessageListener {
     }
 
     public void initClient() {
-        new RealTimeThread().start();
+        if (realTimeThread != null) {
+            realTimeThread.interrupt();
+            realTimeThread = null;
+        }
+        realTimeThread = new RealTimeThread();
+        realTimeThread.start();
     }
 
     @Override
@@ -84,12 +114,20 @@ public class CameraView extends ImageView implements IMessageListener {
             mClient.dispose();
             mClient = null;
         }
+
+        if (realTimeThread != null) {
+            realTimeThread.interrupt();
+            realTimeThread = null;
+        }
+
+        if (mHandler != null) {
+            mHandler.removeCallbacksAndMessages(null);
+        }
     }
 
     public boolean sendRealTimeMessage() {
-        if (mClient != null && isConnectSuccess && !TextUtils.isEmpty(cameraId)) {
-            String msg = parser.genMessageRealTime(cameraId);
-            return mClient.sendGetReadTimeIdMessage(msg);
+        if (mHandler != null) {
+            mHandler.sendEmptyMessage(ARGS_WHAT_SEND_REAL_TIME);
         }
         return false;
     }
@@ -102,14 +140,20 @@ public class CameraView extends ImageView implements IMessageListener {
     @Override
     public void handleMessage(MessageClient messageClient) {
         if (messageClient.isLoginRealTime()) {
+            Log.d("Camera: ", "HungHN: " + messageClient.getDataToString());
             if (!TextUtils.isEmpty(messageClient.getDataToString())) {
                 isConnectSuccess = false;
+                if (mHandler != null) {
+                    mHandler.sendEmptyMessage(ARGS_WHAT_ERROR_LOGIN);
+                }
             }
         } else if (messageClient.isRealTime()) {
             android.os.Message realTimeMsg = new android.os.Message();
             realTimeMsg.what = ARGS_WHAT_REAL_TIME;
             realTimeMsg.obj = parser.parseRealTimeMessage(messageClient);
-            mHandler.sendMessage(realTimeMsg);
+            if (mHandler != null) {
+                mHandler.sendMessage(realTimeMsg);
+            }
         }
     }
 
@@ -122,21 +166,19 @@ public class CameraView extends ImageView implements IMessageListener {
         @Override
         public void run() {
             super.run();
-            if (mClient != null) {
-                mClient.dispose();
-                mClient = null;
-            }
-            UserPref userPref = UserPref.getInstance();
-            mClient = new Client(userPref.getServerAddress());
-            mClient.addIMessageListener(CameraView.this);
             try {
-                sleep(200);
-                String msg = parser.genLoginRealTime(userPref.getUserName(), userPref.getPassword());
-                mClient.sendLoginReadTimeMessage(msg);
+                if (mClient != null) {
+                    mClient.dispose();
+                    mClient = null;
+                }
+                UserPref userPref = UserPref.getInstance();
+                mClient = new Client(userPref.getServerAddress());
+                mClient.addIMessageListener(CameraView.this);
+                if (mHandler != null) {
+                    mHandler.sendEmptyMessageDelayed(ARGS_WHAT_SEND_LOGIN_REAL_TIME, 200);
+                }
                 isConnectSuccess = true;
-                sleep(2000);
-                sendRealTimeMessage();
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
