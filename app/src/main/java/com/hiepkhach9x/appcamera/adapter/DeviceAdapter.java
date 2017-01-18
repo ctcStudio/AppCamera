@@ -1,8 +1,6 @@
 package com.hiepkhach9x.appcamera.adapter;
 
 import android.content.Context;
-import android.media.Image;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.hiepkhach9x.appcamera.R;
-import com.hiepkhach9x.appcamera.customview.CustomListView;
+import com.hiepkhach9x.appcamera.entities.Camera;
 import com.hiepkhach9x.appcamera.entities.Device;
 
 import java.util.ArrayList;
@@ -40,7 +38,7 @@ public class DeviceAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        ArrayList<Device.Camera> cameras = mDevices.get(groupPosition).getCameras();
+        ArrayList<Camera> cameras = mDevices.get(groupPosition).getCameras();
         return cameras == null ? 0 : cameras.size();
     }
 
@@ -51,7 +49,7 @@ public class DeviceAdapter extends BaseExpandableListAdapter {
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        ArrayList<Device.Camera> cameras = mDevices.get(groupPosition).getCameras();
+        ArrayList<Camera> cameras = mDevices.get(groupPosition).getCameras();
         return cameras != null ? cameras.get(childPosition) : null;
     }
 
@@ -83,10 +81,10 @@ public class DeviceAdapter extends BaseExpandableListAdapter {
 
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-        ArrayList<Device.Camera> cameras = mDevices.get(groupPosition).getCameras();
-        Device.Camera camera = cameras.get(childPosition);
+        ArrayList<Camera> cameras = mDevices.get(groupPosition).getCameras();
+        Camera camera = cameras.get(childPosition);
         if (convertView == null) {
-            convertView = mLayoutInflater.inflate(R.layout.item_camera, parent, false);
+            convertView = mLayoutInflater.inflate(R.layout.item_camera_device, parent, false);
         }
         if(camera !=null) {
             ImageView dot = (ImageView) convertView.findViewById(R.id.dot);

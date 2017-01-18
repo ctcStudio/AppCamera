@@ -4,16 +4,31 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="@dimen/space_large"
-        android:text="Camera List" />
+        android:orientation="horizontal">
 
-    <ExpandableListView
-        android:id="@+id/list_device"
+        <Button
+            android:id="@+id/play_back"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/space_large"
+            android:layout_weight="1"
+            android:text="Play back" />
+
+        <Button
+            android:id="@+id/real_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/space_large"
+            android:layout_weight="1"
+            android:text="RealTime" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/list_camera"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:groupIndicator="@null"/>
+        android:dividerHeight="@dimen/space_small" />
 </LinearLayout>

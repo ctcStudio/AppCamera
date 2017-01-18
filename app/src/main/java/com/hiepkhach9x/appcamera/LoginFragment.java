@@ -14,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import com.hiepkhach9x.appcamera.connection.MessageParser;
+import com.hiepkhach9x.appcamera.entities.Camera;
 import com.hiepkhach9x.appcamera.entities.Device;
 import com.hiepkhach9x.appcamera.entities.MessageClient;
 import com.hiepkhach9x.appcamera.preference.UserPref;
@@ -59,10 +60,10 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
         if ((listOnline != null && !listOnline.isEmpty())
                 && (devices != null & !devices.isEmpty())) {
             for (Device device : devices) {
-                ArrayList<Device.Camera> cameras = device.getCameras();
+                ArrayList<Camera> cameras = device.getCameras();
                 if (cameras == null || cameras.isEmpty())
                     continue;
-                for (Device.Camera camera : cameras) {
+                for (Camera camera : cameras) {
                     for (String cameraId : listOnline) {
                         if (camera.getCameraId().equals(cameraId)) {
                             camera.setOnline(true);
@@ -72,6 +73,20 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
                 }
             }
         }
+    }
+
+    private ArrayList<Camera> getListCamera() {
+        ArrayList<Camera> cameras = new ArrayList<>();
+        if (devices != null) {
+            for (Device device : devices) {
+                ArrayList<Camera> cameraArrayList = device.getCameras();
+                if (cameraArrayList == null || cameraArrayList.isEmpty())
+                    continue;
+                cameras.addAll(cameraArrayList);
+            }
+            return cameras;
+        }
+        return cameras;
     }
 
 
@@ -138,9 +153,9 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
     private ArrayList<String> getListCameraIdFromDevice() {
         ArrayList<String> strings = new ArrayList<>();
         for (Device device : devices) {
-            ArrayList<Device.Camera> cameras = device.getCameras();
+            ArrayList<Camera> cameras = device.getCameras();
             if (cameras != null) {
-                for (Device.Camera camera : cameras) {
+                for (Camera camera : cameras) {
                     if (!TextUtils.isEmpty(camera.getCameraId())) {
                         strings.add(camera.getCameraId());
                     }
@@ -209,13 +224,17 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
             if (data.contains("ketthuckhoitaohethong")) {
                 hasLogin = true;
                 dismissDialog();
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        viewLayout();
-                        //startTimer();
-                    }
-                });
+//                new Handler(Looper.getMainLooper()).post(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        viewLayout();
+//                        //startTimer();
+//                    }
+//                });
+
+                if (mLoginClient != null && mLoginClient.isClientAlive())
+                    mLoginClient.sendCheckOnline(getListCameraIdFromDevice());
+
             } else if (data.contains("cameralistbegin")) {
                 devices = messageParser.parseDevice(messageClient.getDataToString());
             } else if (data.contains("khoitaohethong")) {
@@ -230,13 +249,13 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
             updateDeviceOnline(listCamOnline);
             dismissDialog();
 
-//            HomeFragment homeFragment = HomeFragment.newInstance(devices);
-//            if (mNavigateManager != null)
-//                mNavigateManager.swapPage(homeFragment, MainActivity.TAG_HOME);
-            ListCameraFragment cameraFragment = ListCameraFragment.newInstance(listCamOnline);
-            if (mNavigateManager != null) {
-                mNavigateManager.addPage(cameraFragment, MainActivity.TAG_CAMERA);
-            }
+            HomeFragment homeFragment = HomeFragment.newInstance(getListCamera());
+            if (mNavigateManager != null)
+                mNavigateManager.swapPage(homeFragment, MainActivity.TAG_HOME);
+//            ListCameraFragment cameraFragment = ListCameraFragment.newInstance(listCamOnline);
+//            if (mNavigateManager != null) {
+//                mNavigateManager.addPage(cameraFragment, MainActivity.TAG_CAMERA);
+//            }
         }
     }
 

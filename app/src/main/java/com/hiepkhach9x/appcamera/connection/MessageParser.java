@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.hiepkhach9x.appcamera.entities.Camera;
 import com.hiepkhach9x.appcamera.entities.Device;
 import com.hiepkhach9x.appcamera.entities.MessageClient;
 import com.hiepkhach9x.appcamera.entities.RealTime;
@@ -42,15 +43,15 @@ public class MessageParser {
         }
         ArrayList<Device> devices = new ArrayList<>();
         for (String strDevice : dataDevice) {
-            String[] data = strDevice.trim().replace(NEW_LINE,"").split(SPERATER1);
+            String[] data = strDevice.trim().replace(NEW_LINE, "").split(SPERATER1);
             if (data.length > 1) {
                 Device device = new Device();
                 String deviceName = data[0];
                 device.setDeviceName(deviceName);
-                ArrayList<Device.Camera> cameras = new ArrayList<>();
+                ArrayList<Camera> cameras = new ArrayList<>();
                 try {
                     for (int i = 1; i < data.length; i = i + 2) {
-                        Device.Camera camera = new Device.Camera();
+                        Camera camera = new Camera();
                         camera.setCameraName(data[i]);
                         camera.setCameraId(data[i + 1]);
                         cameras.add(camera);
@@ -113,7 +114,7 @@ public class MessageParser {
             int startGps = gpsAll.indexOf(KEY_GPS) + KEY_GPS.length();
             int endGps = gpsAll.lastIndexOf(KEY_GPS);
             String gps = "";
-            if(startGps < endGps) {
+            if (startGps < endGps) {
                 gps = gpsAll.substring(startGps, endGps);
             }
             byte[] pic = Arrays.copyOfRange(bytes, beginPic, endPic + 1); // picture from 0xFF8 to 0xFF9

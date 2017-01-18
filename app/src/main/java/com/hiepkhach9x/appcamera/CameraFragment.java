@@ -10,6 +10,7 @@ import com.hiepkhach9x.appcamera.connection.Client;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
 import com.hiepkhach9x.appcamera.connection.listener.IMessageListener;
 import com.hiepkhach9x.appcamera.customview.CameraView;
+import com.hiepkhach9x.appcamera.entities.Camera;
 import com.hiepkhach9x.appcamera.entities.Device;
 import com.hiepkhach9x.appcamera.entities.MessageClient;
 import com.hiepkhach9x.appcamera.entities.RealTime;
@@ -23,9 +24,9 @@ public class CameraFragment extends BaseFragment {
 
     private static final String ARGS_CAMERA = "args.camera";
     private final String TAG_CAMERA_LISTENER = "fragCameraTag_camera_listener";
-    private Device.Camera camera;
+    private Camera camera;
 
-    public static CameraFragment newInstance(Device.Camera camera) {
+    public static CameraFragment newInstance(Camera camera) {
 
         Bundle args = new Bundle();
         args.putParcelable(ARGS_CAMERA, camera);

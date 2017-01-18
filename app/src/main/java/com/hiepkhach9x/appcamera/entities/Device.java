@@ -51,7 +51,7 @@ public class Device implements Parcelable {
     }
 
     public void setCameras(ArrayList<Camera> cameras) {
-        if(cameras == null) {
+        if (cameras == null) {
             this.cameras = new ArrayList<>();
         }
         this.cameras = cameras;
@@ -71,78 +71,5 @@ public class Device implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(deviceName);
         dest.writeTypedList(cameras);
-    }
-
-    public static class Camera implements Parcelable {
-        private String cameraName;
-        private String cameraId;
-        private boolean isOnline;
-
-        public Camera() {
-        }
-
-        public Camera(String cameraName, String cameraId) {
-            this.cameraName = cameraName;
-            this.cameraId = cameraId;
-        }
-
-        protected Camera(Parcel in) {
-            cameraName = in.readString();
-            cameraId = in.readString();
-            isOnline = in.readByte() != 0;
-        }
-
-        public static final Creator<Camera> CREATOR = new Creator<Camera>() {
-            @Override
-            public Camera createFromParcel(Parcel in) {
-                return new Camera(in);
-            }
-
-            @Override
-            public Camera[] newArray(int size) {
-                return new Camera[size];
-            }
-        };
-
-        public void setCameraName(String cameraName) {
-            this.cameraName = cameraName;
-        }
-
-        public void setCameraId(String cameraId) {
-            this.cameraId = cameraId;
-        }
-
-        public String getCameraName() {
-            return cameraName;
-        }
-
-        public String getCameraId() {
-            return cameraId;
-        }
-
-        public boolean isOnline() {
-            return isOnline;
-        }
-
-        public void setOnline(boolean online) {
-            isOnline = online;
-        }
-
-        @Override
-        public String toString() {
-            return "Camera: " + cameraName + "---ID: " + cameraId;
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(cameraName);
-            dest.writeString(cameraId);
-            dest.writeByte((byte) (isOnline ? 1 : 0));
-        }
     }
 }
