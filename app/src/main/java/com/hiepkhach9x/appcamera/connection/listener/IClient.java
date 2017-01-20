@@ -15,6 +15,8 @@ public interface IClient {
 
     boolean sendGetReadTimeIdMessage(String message);
 
+    boolean sendLoginGetDataMessage(String message);
+
     boolean sendGetDataMessage(String message);
 
     boolean sendMessage(String message);

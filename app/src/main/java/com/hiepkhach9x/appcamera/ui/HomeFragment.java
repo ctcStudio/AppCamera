@@ -1,4 +1,4 @@
-package com.hiepkhach9x.appcamera;
+package com.hiepkhach9x.appcamera.ui;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -6,10 +6,10 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.hiepkhach9x.appcamera.R;
 import com.hiepkhach9x.appcamera.adapter.CameraAdapter;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
 import com.hiepkhach9x.appcamera.entities.Camera;
@@ -196,6 +196,10 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener {
                 }
                 break;
             case R.id.play_back:
+                PlayBackFragment playBackFragment = PlayBackFragment.newInstance(mCameras);
+                if(mNavigateManager!=null) {
+                    mNavigateManager.addPage(playBackFragment,MainActivity.TAG_PLAY_BACK);
+                }
                 break;
         }
     }

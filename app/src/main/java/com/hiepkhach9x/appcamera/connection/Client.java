@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static android.R.attr.port;
+
 /**
  * Created by hungh on 12/27/2016.
  */
@@ -29,9 +31,9 @@ public class Client implements IClient {
     private List<IMessageListener> listenerList;
     private MessageType mCurrentType;
 
-    public Client(String sever) {
+    public Client(String sever,int port) {
         try {
-            mSocket = new Socket(sever, Config.SERVER_PORT);
+            mSocket = new Socket(sever, port);
             mSocket.setSoTimeout(Config.SOCKET_TIMOUT);
 
             inputStream = mSocket.getInputStream();
@@ -87,6 +89,12 @@ public class Client implements IClient {
     public synchronized boolean sendGetReadTimeIdMessage(String msg) {
         mCurrentType = MessageType.REALTIME;
         //String msg = "@messageClient@yeucaulive@messageClient@////1600000000000025////";
+        return sendMessage(msg);
+    }
+
+    @Override
+    public synchronized boolean sendLoginGetDataMessage(String msg) {
+        mCurrentType = MessageType.LOGIN_GETDATA;
         return sendMessage(msg);
     }
 

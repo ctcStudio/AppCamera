@@ -1,17 +1,13 @@
-package com.hiepkhach9x.appcamera;
+package com.hiepkhach9x.appcamera.ui;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-import com.hiepkhach9x.appcamera.adapter.ListCameraAdapter;
+import com.hiepkhach9x.appcamera.R;
 import com.hiepkhach9x.appcamera.customview.CameraLayout;
-import com.hiepkhach9x.appcamera.customview.CameraView;
 import com.hiepkhach9x.appcamera.entities.Camera;
 import com.hiepkhach9x.appcamera.entities.MessageClient;
 

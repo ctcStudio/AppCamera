@@ -1,4 +1,4 @@
-package com.hiepkhach9x.appcamera;
+package com.hiepkhach9x.appcamera.ui;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -6,12 +6,13 @@ import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.view.View;
 
+import com.hiepkhach9x.appcamera.Config;
+import com.hiepkhach9x.appcamera.R;
 import com.hiepkhach9x.appcamera.connection.Client;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
 import com.hiepkhach9x.appcamera.connection.listener.IMessageListener;
 import com.hiepkhach9x.appcamera.customview.CameraView;
 import com.hiepkhach9x.appcamera.entities.Camera;
-import com.hiepkhach9x.appcamera.entities.Device;
 import com.hiepkhach9x.appcamera.entities.MessageClient;
 import com.hiepkhach9x.appcamera.entities.RealTime;
 import com.hiepkhach9x.appcamera.preference.UserPref;
@@ -115,7 +116,7 @@ public class CameraFragment extends BaseFragment {
                         mClient.dispose();
                         mClient = null;
                     }
-                    mClient = new Client(serverAddress);
+                    mClient = new Client(serverAddress, Config.SERVER_PORT);
                     mClient.addIMessageListener(iRealTimeMessage);
                     mClient.sendLoginReadTimeMessage(mMessageParser.genLoginRealTime(userName, password));
                     new Thread().sleep(1000);

@@ -1,8 +1,6 @@
-package com.hiepkhach9x.appcamera;
+package com.hiepkhach9x.appcamera.ui;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -13,6 +11,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
+import com.hiepkhach9x.appcamera.R;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
 import com.hiepkhach9x.appcamera.entities.Camera;
 import com.hiepkhach9x.appcamera.entities.Device;

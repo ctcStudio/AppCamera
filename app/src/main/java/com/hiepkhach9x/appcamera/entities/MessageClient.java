@@ -49,6 +49,10 @@ public class MessageClient {
         return messageType == MessageType.ONLINE;
     }
 
+    public boolean isLoginGetData() {
+        return messageType == MessageType.LOGIN_GETDATA;
+    }
+
     public boolean isStoreData() {
         return messageType == MessageType.GETDATA;
     }

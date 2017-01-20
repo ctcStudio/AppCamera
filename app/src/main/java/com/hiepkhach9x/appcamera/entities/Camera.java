@@ -64,7 +64,7 @@ public class Camera implements Parcelable {
 
     @Override
     public String toString() {
-        return "Camera: " + cameraName + "---ID: " + cameraId;
+        return cameraName + "(" + cameraId + ")";
     }
 
     @Override

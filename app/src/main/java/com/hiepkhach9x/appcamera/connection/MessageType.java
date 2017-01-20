@@ -9,5 +9,6 @@ public enum MessageType {
     ONLINE,
     LOGIN_REALTIME,
     REALTIME,
+    LOGIN_GETDATA,
     GETDATA
 }

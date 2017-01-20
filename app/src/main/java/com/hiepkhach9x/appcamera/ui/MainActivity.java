@@ -1,4 +1,4 @@
-package com.hiepkhach9x.appcamera;
+package com.hiepkhach9x.appcamera.ui;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,8 +10,10 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 
+import com.hiepkhach9x.appcamera.Config;
+import com.hiepkhach9x.appcamera.NetworkChangeReceiver;
+import com.hiepkhach9x.appcamera.R;
 import com.hiepkhach9x.appcamera.connection.Client;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
 import com.hiepkhach9x.appcamera.connection.listener.IMessageListener;
@@ -25,6 +27,7 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
     public static final String TAG_LOGIN = "LOGIN-FRAGMENT";
     public static final String TAG_HOME = "HOME-FRAGMENT";
     public static final String TAG_CAMERA = "CAMERA-FRAGMENT";
+    public static final String TAG_PLAY_BACK = "TAG-PLAYBACK";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
     @Override
     public void initClient() {
         closeClient();
-        mClient = new Client(UserPref.getInstance().getServerAddress());
+        mClient = new Client(UserPref.getInstance().getServerAddress(), Config.SERVER_PORT);
         mClient.addIMessageListener(iMessageListener);
     }
 

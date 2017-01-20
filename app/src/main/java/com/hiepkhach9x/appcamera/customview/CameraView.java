@@ -10,6 +10,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.hiepkhach9x.appcamera.Config;
 import com.hiepkhach9x.appcamera.R;
 import com.hiepkhach9x.appcamera.connection.Client;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
@@ -173,7 +174,7 @@ public class CameraView extends ImageView implements IMessageListener {
                     mClient = null;
                 }
                 UserPref userPref = UserPref.getInstance();
-                mClient = new Client(userPref.getServerAddress());
+                mClient = new Client(userPref.getServerAddress(), Config.SERVER_PORT);
                 mClient.addIMessageListener(CameraView.this);
                 if (mHandler != null) {
                     mHandler.sendEmptyMessageDelayed(ARGS_WHAT_SEND_LOGIN_REAL_TIME, 200);

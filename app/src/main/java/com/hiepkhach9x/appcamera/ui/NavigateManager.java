@@ -1,4 +1,4 @@
-package com.hiepkhach9x.appcamera;
+package com.hiepkhach9x.appcamera.ui;
 
 import android.support.v4.app.Fragment;
 

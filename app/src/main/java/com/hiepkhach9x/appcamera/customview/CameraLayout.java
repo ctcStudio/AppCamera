@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.hiepkhach9x.appcamera.Config;
 import com.hiepkhach9x.appcamera.R;
 import com.hiepkhach9x.appcamera.connection.Client;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
@@ -265,7 +266,7 @@ public class CameraLayout extends FrameLayout implements IMessageListener {
                     mClient = null;
                 }
                 UserPref userPref = UserPref.getInstance();
-                mClient = new Client(userPref.getServerAddress());
+                mClient = new Client(userPref.getServerAddress(), Config.SERVER_PORT);
                 mClient.addIMessageListener(CameraLayout.this);
                 if (mHandler != null) {
                     mHandler.sendEmptyMessageDelayed(ARGS_WHAT_SEND_LOGIN_REAL_TIME, 200);

@@ -155,4 +155,12 @@ public class MessageParser {
     public String genMessageRealTime(String cameraId) {
         return "@message@yeucaulive@message@" + SPERATER1 + cameraId + SPERATER1;
     }
+
+    public String genLoginCallBack(String userName, String password) {
+        return "@haicuong@:" + userName + ":" + password;
+    }
+
+    public String genMessagePlayBack(String fromDate, String toDate, String cameraId) {
+        return null;
+    }
 }
