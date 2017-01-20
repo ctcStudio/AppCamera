@@ -4,12 +4,17 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.hiepkhach9x.appcamera.R;
-import com.hiepkhach9x.appcamera.preference.UserPref;
+import com.hiepkhach9x.appcamera.entities.Camera;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by hungh on 1/13/2017.
@@ -17,15 +22,19 @@ import com.hiepkhach9x.appcamera.preference.UserPref;
 
 public class CameraLayout extends FrameLayout {
 
-    private CameraView mCameraView;
-    private TextView mTxtCameraName, mTxtCameraId;
-    private ImageButton mAddFavorite;
-    private CamViewListener listener;
-    private String mCameraId;
+    private final String INFO_FORMAT = "%s %s %s";
+    private final String SPEED_FORMAT = "%d km/h";
 
-    public CameraLayout(Context context, String cameraId) {
+    private CameraView mCameraView;
+    private TextView mTxtCameraInfo, mTxtCameraAddress, mTxtCameraSpeed;
+    private Button mGps;
+    private CamViewListener listener;
+    private Camera mCamera;
+    private View mapView;
+
+    public CameraLayout(Context context, Camera camera) {
         super(context);
-        this.mCameraId = cameraId;
+        this.mCamera = camera;
         initializeViews(context);
     }
 
@@ -50,48 +59,59 @@ public class CameraLayout extends FrameLayout {
         inflater.inflate(R.layout.item_list_camera, this);
 
         mCameraView = (CameraView) findViewById(R.id.camera);
-        mCameraView.setCameraId(mCameraId);
+        mCameraView.setCameraId(mCamera.getCameraId());
 
-        mTxtCameraName = (TextView) findViewById(R.id.camera_name);
-        mTxtCameraId = (TextView) findViewById(R.id.camera_id);
-        mTxtCameraId.setText(mCameraId);
-        mAddFavorite = (ImageButton) findViewById(R.id.add_favorite);
-        if (UserPref.getInstance().hasCameraFavorite(mCameraId)) {
-            mAddFavorite.setBackgroundResource(R.drawable.ic_favorited);
-        } else {
-            mAddFavorite.setBackgroundResource(R.drawable.ic_favorite);
-        }
+        mTxtCameraInfo = (TextView) findViewById(R.id.camera_info);
+        setCameraInfo();
 
-        mAddFavorite.setOnClickListener(new OnClickListener() {
+        mTxtCameraAddress = (TextView) findViewById(R.id.camera_address);
+        mTxtCameraAddress.setText("Ha Noi");
+
+        mTxtCameraSpeed = (TextView) findViewById(R.id.camera_speed);
+        setCameraSpeed();
+
+        mapView = findViewById(R.id.map_view);
+        mGps = (Button) findViewById(R.id.gps);
+
+        mGps.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (listener != null) {
-                    listener.clickFavorite(mCameraId);
-                }
-                UserPref userPref = UserPref.getInstance();
-                if(userPref.hasCameraFavorite(mCameraId)) {
-                    userPref.removeCameraFavorite(mCameraId);
-                    mAddFavorite.setBackgroundResource(R.drawable.ic_favorite);
+                if (mapView.getVisibility() == VISIBLE) {
+                    mapView.setVisibility(GONE);
                 } else {
-                    userPref.saveCameraFavorite(mCameraId);
-                    mAddFavorite.setBackgroundResource(R.drawable.ic_favorited);
+                    mapView.setVisibility(VISIBLE);
                 }
             }
         });
     }
 
+    private void setCameraSpeed() {
+        String speed = String.format(SPEED_FORMAT,50);
+        mTxtCameraSpeed.setText(speed);
+    }
+
+    private void setCameraInfo() {
+        Calendar calendar = Calendar.getInstance();
+        Date date = calendar.getTime();
+        DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+        String info = String.format(INFO_FORMAT, df.format(date), mCamera.getCameraName(), mCamera.getCameraId());
+        mTxtCameraInfo.setText(mCamera.getCameraName());
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        mTxtCameraId.setText(mCameraId);
+        if (mCamera != null)
+            mTxtCameraAddress.setText(mCamera.getCameraId());
     }
 
-    public void setCameraId(String mCameraId) {
-        this.mCameraId = mCameraId;
+    public void setCameraId(Camera camera) {
+        this.mCamera = camera;
         if (mCameraView != null) {
             mCameraView.initClient();
         }
-        mTxtCameraId.setText(mCameraId);
+        if (mCamera != null)
+            mTxtCameraAddress.setText(camera.getCameraId());
     }
 
     public void setListener(CamViewListener listener) {

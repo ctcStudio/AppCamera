@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import com.hiepkhach9x.appcamera.adapter.ListCameraAdapter;
 import com.hiepkhach9x.appcamera.customview.CameraLayout;
 import com.hiepkhach9x.appcamera.customview.CameraView;
+import com.hiepkhach9x.appcamera.entities.Camera;
 import com.hiepkhach9x.appcamera.entities.MessageClient;
 
 import java.util.ArrayList;
@@ -24,16 +25,16 @@ public class ListCameraFragment extends BaseFragment implements CameraLayout.Cam
 
     private static final String ARGS_LIST_CAMERA = "args.list.camera";
 
-    public static ListCameraFragment newInstance(ArrayList<String> listCamera) {
+    public static ListCameraFragment newInstance(ArrayList<Camera> listCamera) {
 
         Bundle args = new Bundle();
-        args.putStringArrayList(ARGS_LIST_CAMERA, listCamera);
+        args.putParcelableArrayList(ARGS_LIST_CAMERA, listCamera);
         ListCameraFragment fragment = new ListCameraFragment();
         fragment.setArguments(args);
         return fragment;
     }
 
-    private ArrayList<String> listCamera;
+    private ArrayList<Camera> listCamera;
 //    private RecyclerView mRecyclerView;
 //    private ListCameraAdapter cameraAdapter;
     private LinearLayout mLayoutCamera;
@@ -42,9 +43,9 @@ public class ListCameraFragment extends BaseFragment implements CameraLayout.Cam
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
-            listCamera = savedInstanceState.getStringArrayList(ARGS_LIST_CAMERA);
+            listCamera = savedInstanceState.getParcelableArrayList(ARGS_LIST_CAMERA);
         } else if (getArguments() != null) {
-            listCamera = getArguments().getStringArrayList(ARGS_LIST_CAMERA);
+            listCamera = getArguments().getParcelableArrayList(ARGS_LIST_CAMERA);
         }
         if(listCamera == null) {
             listCamera = new ArrayList<>();
@@ -54,7 +55,7 @@ public class ListCameraFragment extends BaseFragment implements CameraLayout.Cam
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putStringArrayList(ARGS_LIST_CAMERA, listCamera);
+        outState.putParcelableArrayList(ARGS_LIST_CAMERA, listCamera);
     }
 
     @Override
@@ -67,8 +68,8 @@ public class ListCameraFragment extends BaseFragment implements CameraLayout.Cam
 //        mRecyclerView.setHasFixedSize(true);
 //        mRecyclerView.setAdapter(cameraAdapter);
         mLayoutCamera = (LinearLayout) view.findViewById(R.id.layout_camera);
-        for (String cameraId: listCamera) {
-            mLayoutCamera.addView(createCameraView(cameraId));
+        for (Camera camera: listCamera) {
+            mLayoutCamera.addView(createCameraView(camera));
         }
         mLayoutCamera.invalidate();
     }
@@ -78,8 +79,8 @@ public class ListCameraFragment extends BaseFragment implements CameraLayout.Cam
         super.onActivityCreated(savedInstanceState);
     }
 
-    private View createCameraView(String cameraID) {
-        CameraLayout cameraLayout = new CameraLayout(getContext(),cameraID);
+    private View createCameraView(Camera camera) {
+        CameraLayout cameraLayout = new CameraLayout(getContext(),camera);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         cameraLayout.setLayoutParams(layoutParams);
         cameraLayout.setListener(this);
