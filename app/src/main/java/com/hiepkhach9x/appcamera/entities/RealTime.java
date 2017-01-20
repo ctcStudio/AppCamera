@@ -9,42 +9,24 @@ import android.os.Parcelable;
  */
 
 public class RealTime implements Parcelable {
-    String gpsData;
+    GpsInfo gpsData;
     Bitmap pictureData;
     long idData;
 
     public RealTime() {
     }
 
-    public RealTime(String gpsData, Bitmap pictureData,long idData) {
+    public RealTime(GpsInfo gpsData, Bitmap pictureData,long idData) {
         this.gpsData = gpsData;
         this.pictureData = pictureData;
         this.idData = idData;
     }
 
-    protected RealTime(Parcel in) {
-        gpsData = in.readString();
-        pictureData = in.readParcelable(Bitmap.class.getClassLoader());
-        idData = in.readLong();
-    }
-
-    public static final Creator<RealTime> CREATOR = new Creator<RealTime>() {
-        @Override
-        public RealTime createFromParcel(Parcel in) {
-            return new RealTime(in);
-        }
-
-        @Override
-        public RealTime[] newArray(int size) {
-            return new RealTime[size];
-        }
-    };
-
-    public String getGpsData() {
+    public GpsInfo getGpsData() {
         return gpsData;
     }
 
-    public void setGpsData(String gpsData) {
+    public void setGpsData(GpsInfo gpsData) {
         this.gpsData = gpsData;
     }
 
@@ -64,6 +46,24 @@ public class RealTime implements Parcelable {
         this.idData = idData;
     }
 
+    protected RealTime(Parcel in) {
+        gpsData = in.readParcelable(GpsInfo.class.getClassLoader());
+        pictureData = in.readParcelable(Bitmap.class.getClassLoader());
+        idData = in.readLong();
+    }
+
+    public static final Creator<RealTime> CREATOR = new Creator<RealTime>() {
+        @Override
+        public RealTime createFromParcel(Parcel in) {
+            return new RealTime(in);
+        }
+
+        @Override
+        public RealTime[] newArray(int size) {
+            return new RealTime[size];
+        }
+    };
+
     @Override
     public int describeContents() {
         return 0;
@@ -71,7 +71,7 @@ public class RealTime implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(gpsData);
+        parcel.writeParcelable(gpsData, i);
         parcel.writeParcelable(pictureData, i);
         parcel.writeLong(idData);
     }

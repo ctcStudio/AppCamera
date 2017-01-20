@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.hiepkhach9x.appcamera.adapter.CameraAdapter;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
@@ -40,14 +41,36 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener {
         if ((listOnline != null && !listOnline.isEmpty())
                 && (mCameras != null & !mCameras.isEmpty())) {
             for (Camera camera : mCameras) {
-                for (String cameraId : listOnline) {
-                    if (camera.getCameraId().equals(cameraId)) {
-                        camera.setOnline(true);
-                    }
+                if (listOnline.contains(camera.getCameraId())) {
+                    camera.setOnline(true);
+                } else {
+                    camera.setOnline(false);
                 }
             }
         }
+    }
 
+    private boolean hasContains(ArrayList<String> listOnline, String id) {
+        for(String string : listOnline) {
+            if(string.equals(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private ArrayList<Camera> getDeviceOnline(ArrayList<String> listOnline) {
+        ArrayList<Camera> cameras = new ArrayList<>();
+        if ((listOnline != null && !listOnline.isEmpty())
+                && (mCameras != null & !mCameras.isEmpty())) {
+            for (Camera camera : mCameras) {
+                if (listOnline.contains(camera.getCameraId())) {
+                    Log.d("HungHN","has contains: " + camera.getCameraId());
+                    cameras.add(camera);
+                }
+            }
+        }
+        return cameras;
     }
 
     private ListView lisCamera;
@@ -146,11 +169,16 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener {
                     }
                 });
             }
-            if(isRealTime) {
+            if (isRealTime) {
                 isRealTime = false;
-                ListCameraFragment listCameraFragment = ListCameraFragment.newInstance(listOnline);
-                if(mNavigateManager!=null) {
-                    mNavigateManager.addPage(listCameraFragment,MainActivity.TAG_CAMERA);
+                ArrayList<Camera> cameras = getDeviceOnline(listOnline);
+                if (cameras != null) {
+                    ListCameraFragment listCameraFragment = ListCameraFragment.newInstance(cameras);
+                    if (mNavigateManager != null) {
+                        mNavigateManager.addPage(listCameraFragment, MainActivity.TAG_CAMERA);
+                    }
+                } else {
+                    Toast.makeText(getContext(), "Camera lựa chọn không online", Toast.LENGTH_SHORT).show();
                 }
             }
         }

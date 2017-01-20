@@ -83,7 +83,7 @@ public class ListCameraFragment extends BaseFragment implements CameraLayout.Cam
         CameraLayout cameraLayout = new CameraLayout(getContext(),camera);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         cameraLayout.setLayoutParams(layoutParams);
-        cameraLayout.setListener(this);
+        cameraLayout.initClient();
         return cameraLayout;
     }
 

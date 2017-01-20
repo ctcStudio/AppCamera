@@ -1,12 +1,11 @@
 package com.hiepkhach9x.appcamera.adapter;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.hiepkhach9x.appcamera.R;
@@ -50,14 +49,14 @@ public class ListCameraAdapter extends RecyclerView.Adapter<ListCameraAdapter.Ca
 
     class CameraHolder extends RecyclerView.ViewHolder {
         CameraView cameraView;
-        ImageButton addFavorite;
-        TextView cameraId;
+        Button gps;
+        TextView cameraInfo;
 
         public CameraHolder(View itemView) {
             super(itemView);
             cameraView = (CameraView) itemView.findViewById(R.id.camera);
-            addFavorite = (ImageButton) itemView.findViewById(R.id.add_favorite);
-            cameraId = (TextView) itemView.findViewById(R.id.camera_id);
+            gps = (Button) itemView.findViewById(R.id.gps);
+            cameraInfo = (TextView) itemView.findViewById(R.id.camera_info);
         }
 
 
@@ -65,7 +64,7 @@ public class ListCameraAdapter extends RecyclerView.Adapter<ListCameraAdapter.Ca
             if (cameraView != null) {
                 cameraView.setCameraId(id);
             }
-            cameraId.setText(id);
+            cameraInfo.setText(id);
         }
     }
 }

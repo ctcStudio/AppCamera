@@ -94,8 +94,8 @@ public class CameraView extends ImageView implements IMessageListener {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        parser = new MessageParser();
-        initClient();
+        //parser = new MessageParser();
+        //initClient();
     }
 
     public void initClient() {
@@ -156,6 +156,7 @@ public class CameraView extends ImageView implements IMessageListener {
             }
         }
     }
+
 
 
     public void setCameraId(String cameraId) {
