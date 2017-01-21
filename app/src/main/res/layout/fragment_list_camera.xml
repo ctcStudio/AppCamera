@@ -16,7 +16,26 @@
             android:id="@+id/layout_camera"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"/>
+            android:orientation="vertical" />
     </ScrollView>
 
+    <FrameLayout
+        android:id="@+id/layout_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorAccent"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/image_full"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
+    </FrameLayout>
+
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/map_full"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
 </FrameLayout>

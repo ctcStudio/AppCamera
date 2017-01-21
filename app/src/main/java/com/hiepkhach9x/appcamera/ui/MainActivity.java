@@ -56,6 +56,22 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
     }
 
     @Override
+    public void onBackPressed() {
+        Fragment activePage = getActivePage();
+        if (activePage instanceof ListCameraFragment) {
+            if (((ListCameraFragment) activePage).goBack()) {
+                super.onBackPressed();
+            }
+        } else if (activePage instanceof VODFragment) {
+            if (((VODFragment) activePage).goBack()) {
+                super.onBackPressed();
+            }
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
     public Fragment getActivePage() {
         FragmentManager manager = getSupportFragmentManager();
         return manager.findFragmentById(getContentLayout());

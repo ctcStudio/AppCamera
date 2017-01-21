@@ -56,6 +56,9 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
     private RealTimeThread realTimeThread;
     private MessageParser parser;
     private boolean isConnectSuccess;
+    private ClickCameraInterface cameraListener;
+    private UpdateCameraInfo updateCameraInfo;
+
     private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(android.os.Message message) {
@@ -79,6 +82,9 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
                                 showGpsLocation(gpsInfo.getLat(), gpsInfo.getLog());
                                 mTxtCameraAddress.setText(gpsInfo.getAddress());
                             }
+                        }
+                        if (updateCameraInfo != null) {
+                            updateCameraInfo.onUpdateInfo(realTime);
                         }
                     }
                     return true;
@@ -176,6 +182,15 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
                 } else {
                     mapView.setVisibility(VISIBLE);
                     mGps.setText("hide Gps");
+                }
+            }
+        });
+
+        mCameraView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (cameraListener != null) {
+                    cameraListener.onClickCamera(mCamera.getCameraId());
                 }
             }
         });
@@ -283,6 +298,14 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
         Log.d("HungHN", "init map for camera : " + mCamera.getCameraId());
         gMap = googleMap;
         //showGpsLocation(21.131, 105.803);
+        gMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                if (cameraListener != null) {
+                    cameraListener.onClickMap(mCamera.getCameraId());
+                }
+            }
+        });
     }
 
     private void showGpsLocation(double lat, double log) {
@@ -344,5 +367,28 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
         if (mapView != null) {
             mapView.onLowMemory();
         }
+    }
+
+    public boolean hasCamera(String cameraId) {
+        if(mCamera == null) {
+            return false;
+        }
+        return mCamera.getCameraId().equals(cameraId);
+    }
+
+    public void setCameraListener(ClickCameraInterface cameraListener) {
+        this.cameraListener = cameraListener;
+    }
+
+    public void setUpdateCameraInfo(UpdateCameraInfo updateCameraInfo) {
+        this.updateCameraInfo = updateCameraInfo;
+    }
+
+    public void removeUpdateCameraInfo() {
+        this.updateCameraInfo = null;
+    }
+
+    public interface UpdateCameraInfo {
+        void onUpdateInfo(RealTime realTime);
     }
 }

@@ -118,4 +118,8 @@ public class VODFragment extends BaseFragment {
     public void handleMessageClient(MessageClient messageClient) {
 
     }
+
+    public boolean goBack() {
+        return true;
+    }
 }
