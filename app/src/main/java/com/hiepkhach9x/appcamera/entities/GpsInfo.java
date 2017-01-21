@@ -1,11 +1,16 @@
 package com.hiepkhach9x.appcamera.entities;
 
+import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.hiepkhach9x.appcamera.connection.MessageParser;
 
-import java.util.regex.Pattern;
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by hungnh on 1/20/17.
@@ -96,7 +101,7 @@ public class GpsInfo implements Parcelable {
     }
 
     public double getLat() {
-        return lat;
+        return convertGpsDecimal(lat);
     }
 
     public void setLat(double lat) {
@@ -112,7 +117,7 @@ public class GpsInfo implements Parcelable {
     }
 
     public double getLog() {
-        return log;
+        return convertGpsDecimal(log);
     }
 
     public void setLog(double log) {
@@ -183,5 +188,31 @@ public class GpsInfo implements Parcelable {
         parcel.writeDouble(speed);
         parcel.writeString(alt);
         parcel.writeString(course);
+    }
+
+    /**
+     * @param pos DDMM.MMMM format
+     * @return to double
+     */
+    private double convertGpsDecimal(double pos) {
+        int degrees = (int) (pos / 100);
+        double minutes = pos - (degrees * 100);
+        return degrees + minutes / 60;
+    }
+
+    public String getAddressFromGps(Context context) {
+        try {
+            Geocoder geocoder;
+            List<Address> addresses;
+            geocoder = new Geocoder(context, Locale.getDefault());
+
+            addresses = geocoder.getFromLocation(getLat(), getLog(), 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+
+            String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+            return address;
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return "";
     }
 }

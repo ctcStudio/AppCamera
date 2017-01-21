@@ -125,7 +125,12 @@ public class MessageParser {
             if (startGps < endGps) {
                 gps = gpsAll.substring(startGps, endGps);
             }
-            GpsInfo gpsInfo = new GpsInfo(gps);
+            GpsInfo gpsInfo;
+            if (TextUtils.isEmpty(gps)) {
+                gpsInfo = new GpsInfo();
+            } else {
+                gpsInfo = new GpsInfo(gps);
+            }
             byte[] pic = Arrays.copyOfRange(bytes, beginPic, endPic + 1); // picture from 0xFF8 to 0xFF9
             BitmapFactory.Options options = new BitmapFactory.Options();
             Bitmap bitmap = BitmapFactory.decodeByteArray(pic, 0, pic.length, options);
@@ -150,7 +155,7 @@ public class MessageParser {
         String[] datas = data.split(BEGIN);
         ArrayList<StoreData> storeDatas = new ArrayList<>();
         for (String str : datas) {
-            if(str.contains(BACKSLASH)) {
+            if (str.contains(BACKSLASH)) {
                 StoreData storeData = new StoreData(str);
                 storeDatas.add(storeData);
             }

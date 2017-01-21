@@ -50,15 +50,6 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener {
         }
     }
 
-    private boolean hasContains(ArrayList<String> listOnline, String id) {
-        for(String string : listOnline) {
-            if(string.equals(id)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private ArrayList<Camera> getDeviceOnline(ArrayList<String> listOnline) {
         ArrayList<Camera> cameras = new ArrayList<>();
         if ((listOnline != null && !listOnline.isEmpty())

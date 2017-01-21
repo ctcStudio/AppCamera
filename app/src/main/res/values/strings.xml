@@ -13,5 +13,5 @@
         <item>haicuong.no-ip.biz</item>
     </string-array>
 
-    <string name="google_maps_key">AIzaSyCCMatQ4BV56bIdae9fDjiwmhd4IeulBzQ</string>
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyBQ6ZejP649LZlq11FHlFChra_Kk69r6S4</string>
 </resources>

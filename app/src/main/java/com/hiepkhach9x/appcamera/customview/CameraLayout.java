@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -14,12 +15,20 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.hiepkhach9x.appcamera.Config;
 import com.hiepkhach9x.appcamera.R;
 import com.hiepkhach9x.appcamera.connection.Client;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
 import com.hiepkhach9x.appcamera.connection.listener.IMessageListener;
 import com.hiepkhach9x.appcamera.entities.Camera;
+import com.hiepkhach9x.appcamera.entities.GpsInfo;
 import com.hiepkhach9x.appcamera.entities.MessageClient;
 import com.hiepkhach9x.appcamera.entities.RealTime;
 import com.hiepkhach9x.appcamera.preference.UserPref;
@@ -33,7 +42,7 @@ import java.util.Date;
  * Created by hungh on 1/13/2017.
  */
 
-public class CameraLayout extends FrameLayout implements IMessageListener {
+public class CameraLayout extends FrameLayout implements IMessageListener, OnMapReadyCallback {
     public final static String TAG = "Camera_Layout";
     private final String INFO_FORMAT = "%s %s %s";
     private final String SPEED_FORMAT = "%d km/h";
@@ -65,7 +74,10 @@ public class CameraLayout extends FrameLayout implements IMessageListener {
                                 setCameraInfo();
                             }
                             if (realTime.getGpsData() != null) {
-                                setCameraSpeed((int) realTime.getGpsData().getSpeedKm());
+                                GpsInfo gpsInfo = realTime.getGpsData();
+                                setCameraSpeed((int) gpsInfo.getSpeedKm());
+                                showGpsLocation(gpsInfo.getLat(), gpsInfo.getLog());
+                                mTxtCameraAddress.setText(gpsInfo.getAddressFromGps(getContext()));
                             }
                         }
                     }
@@ -102,11 +114,14 @@ public class CameraLayout extends FrameLayout implements IMessageListener {
     private TextView mTxtCameraInfo, mTxtCameraAddress, mTxtCameraSpeed;
     private Button mGps;
     private Camera mCamera;
-    private View mapView;
+    private MapView mapView;
+    private GoogleMap gMap;
+    private Bundle savedInstanceState = null;
 
-    public CameraLayout(Context context, Camera camera) {
+    public CameraLayout(Context context, Camera camera, Bundle bundle) {
         super(context);
         this.mCamera = camera;
+        savedInstanceState = bundle;
         initializeViews(context);
     }
 
@@ -144,16 +159,23 @@ public class CameraLayout extends FrameLayout implements IMessageListener {
         mTxtCameraSpeed = (TextView) findViewById(R.id.camera_speed);
         setCameraSpeed(0);
 
-        mapView = findViewById(R.id.map_view);
-        mGps = (Button) findViewById(R.id.gps);
+        mapView = (MapView) findViewById(R.id.map_view);
+        if (savedInstanceState == null) {
+            savedInstanceState = new Bundle();
+        }
+        mapView.onCreate(savedInstanceState);
+        mapView.getMapAsync(this);
 
+        mGps = (Button) findViewById(R.id.gps);
         mGps.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mapView.getVisibility() == VISIBLE) {
+                    mGps.setText("Show Gps");
                     mapView.setVisibility(GONE);
                 } else {
                     mapView.setVisibility(VISIBLE);
+                    mGps.setText("hide Gps");
                 }
             }
         });
@@ -256,6 +278,24 @@ public class CameraLayout extends FrameLayout implements IMessageListener {
         }
     }
 
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        Log.d("HungHN", "init map for camera : " + mCamera.getCameraId());
+        gMap = googleMap;
+        //showGpsLocation(21.131, 105.803);
+    }
+
+    private void showGpsLocation(double lat, double log) {
+        LatLng cam = new LatLng(lat, log);
+        MarkerOptions markerOptions = new MarkerOptions().position(cam)
+                .title(mCamera.getCameraName());
+
+        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_oto));
+        gMap.addMarker(markerOptions);
+        gMap.setMinZoomPreference(15.0f);
+        gMap.moveCamera(CameraUpdateFactory.newLatLng(cam));
+    }
+
     class RealTimeThread extends Thread {
         @Override
         public void run() {
@@ -268,8 +308,12 @@ public class CameraLayout extends FrameLayout implements IMessageListener {
                 UserPref userPref = UserPref.getInstance();
                 mClient = new Client(userPref.getServerAddress(), Config.SERVER_PORT);
                 mClient.addIMessageListener(CameraLayout.this);
+
+                String msg = parser.genLoginRealTime(userPref.getUserName(), userPref.getPassword());
+                mClient.sendLoginReadTimeMessage(msg);
+
                 if (mHandler != null) {
-                    mHandler.sendEmptyMessageDelayed(ARGS_WHAT_SEND_LOGIN_REAL_TIME, 200);
+                    mHandler.sendEmptyMessageDelayed(ARGS_WHAT_SEND_REAL_TIME, 2000);
                 }
                 isConnectSuccess = true;
             } catch (Exception e) {
@@ -278,7 +322,27 @@ public class CameraLayout extends FrameLayout implements IMessageListener {
         }
     }
 
-    public interface CamViewListener {
-        void clickFavorite(String cameraId);
+    public void mapViewOnResume() {
+        if (mapView != null) {
+            mapView.onResume();
+        }
+    }
+
+    public void mapViewPause() {
+        if (mapView != null) {
+            mapView.onPause();
+        }
+    }
+
+    public void mapViewOnDestroy() {
+        if (mapView != null) {
+            mapView.onDestroy();
+        }
+    }
+
+    public void mapViewOnLowMemory() {
+        if (mapView != null) {
+            mapView.onLowMemory();
+        }
     }
 }

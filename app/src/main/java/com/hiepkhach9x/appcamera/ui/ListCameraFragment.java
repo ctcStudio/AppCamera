@@ -17,7 +17,7 @@ import java.util.ArrayList;
  * Created by hungnh on 1/10/17.
  */
 
-public class ListCameraFragment extends BaseFragment implements CameraLayout.CamViewListener {
+public class ListCameraFragment extends BaseFragment {
 
     private static final String ARGS_LIST_CAMERA = "args.list.camera";
 
@@ -31,7 +31,7 @@ public class ListCameraFragment extends BaseFragment implements CameraLayout.Cam
     }
 
     private ArrayList<Camera> listCamera;
-//    private RecyclerView mRecyclerView;
+    //    private RecyclerView mRecyclerView;
 //    private ListCameraAdapter cameraAdapter;
     private LinearLayout mLayoutCamera;
 
@@ -43,7 +43,7 @@ public class ListCameraFragment extends BaseFragment implements CameraLayout.Cam
         } else if (getArguments() != null) {
             listCamera = getArguments().getParcelableArrayList(ARGS_LIST_CAMERA);
         }
-        if(listCamera == null) {
+        if (listCamera == null) {
             listCamera = new ArrayList<>();
         }
     }
@@ -53,6 +53,8 @@ public class ListCameraFragment extends BaseFragment implements CameraLayout.Cam
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(ARGS_LIST_CAMERA, listCamera);
     }
+
+    private ArrayList<CameraLayout> listCameraLayout;
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -64,8 +66,15 @@ public class ListCameraFragment extends BaseFragment implements CameraLayout.Cam
 //        mRecyclerView.setHasFixedSize(true);
 //        mRecyclerView.setAdapter(cameraAdapter);
         mLayoutCamera = (LinearLayout) view.findViewById(R.id.layout_camera);
-        for (Camera camera: listCamera) {
-            mLayoutCamera.addView(createCameraView(camera));
+        if (listCameraLayout == null) {
+            listCameraLayout = new ArrayList<>();
+        } else {
+            listCameraLayout.clear();
+        }
+        for (Camera camera : listCamera) {
+            CameraLayout cameraLayout = createCameraView(camera, savedInstanceState);
+            listCameraLayout.add(cameraLayout);
+            mLayoutCamera.addView(cameraLayout);
         }
         mLayoutCamera.invalidate();
     }
@@ -75,12 +84,44 @@ public class ListCameraFragment extends BaseFragment implements CameraLayout.Cam
         super.onActivityCreated(savedInstanceState);
     }
 
-    private View createCameraView(Camera camera) {
-        CameraLayout cameraLayout = new CameraLayout(getContext(),camera);
+    private CameraLayout createCameraView(Camera camera, Bundle bundle) {
+        CameraLayout cameraLayout = new CameraLayout(getContext(), camera,bundle);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         cameraLayout.setLayoutParams(layoutParams);
         cameraLayout.initClient();
         return cameraLayout;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        for (CameraLayout layout : listCameraLayout) {
+            layout.mapViewOnResume();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        for (CameraLayout layout : listCameraLayout) {
+            layout.mapViewPause();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        for (CameraLayout layout : listCameraLayout) {
+            layout.mapViewOnDestroy();
+        }
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        for (CameraLayout layout : listCameraLayout) {
+            layout.mapViewOnLowMemory();
+        }
     }
 
     @Override
@@ -90,11 +131,6 @@ public class ListCameraFragment extends BaseFragment implements CameraLayout.Cam
 
     @Override
     public void handleMessageClient(MessageClient messageClient) {
-
-    }
-
-    @Override
-    public void clickFavorite(String cameraId) {
 
     }
 }
