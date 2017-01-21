@@ -8,5 +8,6 @@ public class Config {
 
     public static final String SERVER_ADDRESS = "haicuong.no-ip.biz";
     public static final int SERVER_PORT = 5050;
+    public static final int SERVER_STORE_PORT = SERVER_PORT + 1;
     public static final int SOCKET_TIMOUT = 20;
 }

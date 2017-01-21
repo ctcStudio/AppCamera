@@ -65,6 +65,21 @@ public class Client implements IClient {
     }
 
     @Override
+    public synchronized boolean sendMessage(byte[] bytes) {
+        Log.d("HungHN", "send message: " + new String(bytes).trim());
+        if (mSocket != null) {
+            try {
+                outputStream.write(bytes);
+                outputStream.flush();
+                return true;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    @Override
     public synchronized boolean sendLoginMessage(String msg) {
         mCurrentType = MessageType.LOGIN;
         //String msg = "@haicuong@:" + userName + ":" + pass;
@@ -101,6 +116,12 @@ public class Client implements IClient {
     @Override
     public synchronized boolean sendGetDataMessage(String msg) {
         mCurrentType = MessageType.GETDATA;
+        return sendMessage(msg);
+    }
+
+    @Override
+    public synchronized boolean sendGetVODDataMessage(byte[] msg) {
+        mCurrentType = MessageType.VODDATA;
         return sendMessage(msg);
     }
 

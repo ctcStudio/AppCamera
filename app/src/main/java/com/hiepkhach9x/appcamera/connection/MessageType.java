@@ -10,5 +10,6 @@ public enum MessageType {
     LOGIN_REALTIME,
     REALTIME,
     LOGIN_GETDATA,
-    GETDATA
+    GETDATA,
+    VODDATA
 }

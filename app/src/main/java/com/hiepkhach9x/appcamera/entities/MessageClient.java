@@ -56,4 +56,8 @@ public class MessageClient {
     public boolean isStoreData() {
         return messageType == MessageType.GETDATA;
     }
+
+    public boolean isVOData() {
+        return messageType == MessageType.VODDATA;
+    }
 }

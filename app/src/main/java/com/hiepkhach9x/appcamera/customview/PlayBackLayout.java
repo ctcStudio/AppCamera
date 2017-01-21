@@ -30,7 +30,7 @@ import com.hiepkhach9x.appcamera.connection.listener.IMessageListener;
 import com.hiepkhach9x.appcamera.entities.Camera;
 import com.hiepkhach9x.appcamera.entities.GpsInfo;
 import com.hiepkhach9x.appcamera.entities.MessageClient;
-import com.hiepkhach9x.appcamera.entities.RealTime;
+import com.hiepkhach9x.appcamera.entities.VOData;
 import com.hiepkhach9x.appcamera.preference.UserPref;
 
 import java.text.DateFormat;
@@ -42,63 +42,55 @@ import java.util.Date;
  * Created by hungh on 1/13/2017.
  */
 
-public class CameraLayout extends FrameLayout implements IMessageListener, OnMapReadyCallback {
+public class PlayBackLayout extends FrameLayout implements IMessageListener, OnMapReadyCallback {
     public final static String TAG = "Camera_Layout";
     private final String INFO_FORMAT = "%s %s %s";
     private final String SPEED_FORMAT = "%d km/h";
 
-    private static final int ARGS_WHAT_SEND_LOGIN_REAL_TIME = 121;
-    private final int ARGS_WHAT_REAL_TIME = 123;
-    private static final int ARGS_WHAT_SEND_REAL_TIME = 124;
+    private final int ARGS_WHAT_PLAY_BACK = 123;
+    private static final int ARGS_WHAT_SEND_PLAY_BACK = 124;
     private static final int ARGS_WHAT_ERROR_LOGIN = 125;
 
+    private final short TIME_PLAY = 1000; // from 0 - 3600s độ dài 2 bytes dạng unsigned integer 16
+    private final char PLAY_SPEED = '5'; // from x1-x9 độ dài 1 bytes dạng unsigned integer 8
+
     private Client mClient;
-    private RealTimeThread realTimeThread;
+    private PlayBackThread playBackThread;
     private MessageParser parser;
     private boolean isConnectSuccess;
     private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(android.os.Message message) {
             switch (message.what) {
-                case ARGS_WHAT_REAL_TIME:
-                    if (message.obj instanceof RealTime) {
-                        RealTime realTime = (RealTime) message.obj;
-                        if (realTime != null) {
-                            if (realTime.getPictureData() != null) {
-                                Drawable drawable = new BitmapDrawable(getResources(), realTime.getPictureData());
-                                if (Build.VERSION.SDK_INT > 16) {
-                                    mCameraView.setBackground(drawable);
-                                } else {
-                                    mCameraView.setBackgroundDrawable(drawable);
-                                }
-                                setCameraInfo();
+                case ARGS_WHAT_PLAY_BACK:
+                    if (message.obj instanceof VOData) {
+                        VOData voData = (VOData) message.obj;
+                        if (voData.getPictureData() != null) {
+                            Drawable drawable = new BitmapDrawable(getResources(), voData.getPictureData());
+                            if (Build.VERSION.SDK_INT > 16) {
+                                mCameraView.setBackground(drawable);
+                            } else {
+                                mCameraView.setBackgroundDrawable(drawable);
                             }
-                            if (realTime.getGpsData() != null) {
-                                GpsInfo gpsInfo = realTime.getGpsData();
-                                setCameraSpeed((int) gpsInfo.getSpeedKm());
-                                showGpsLocation(gpsInfo.getLat(), gpsInfo.getLog());
-                                mTxtCameraAddress.setText(gpsInfo.getAddress());
-                            }
+                        }
+                        if(TextUtils.isEmpty(voData.getFileName())) {
+                            setCameraInfo(voData.getFileName());
+                        }
+                        if (voData.getGpsData() != null) {
+                            GpsInfo gpsInfo = voData.getGpsData();
+                            setCameraSpeed((int) gpsInfo.getSpeedKm());
+                            showGpsLocation(gpsInfo.getLat(), gpsInfo.getLog());
+                            mTxtCameraAddress.setText(gpsInfo.getAddress());
                         }
                     }
                     return true;
-                case ARGS_WHAT_SEND_LOGIN_REAL_TIME:
-                    if (mClient != null) {
-                        UserPref userPref = UserPref.getInstance();
-                        String msg = parser.genLoginRealTime(userPref.getUserName(), userPref.getPassword());
-                        mClient.sendLoginReadTimeMessage(msg);
-                    }
-                    if (mHandler != null) {
-                        mHandler.sendEmptyMessageDelayed(ARGS_WHAT_SEND_REAL_TIME, 2000);
-                    }
-                    return true;
-                case ARGS_WHAT_SEND_REAL_TIME:
+                case ARGS_WHAT_SEND_PLAY_BACK:
                     if (mClient != null
                             && mCamera != null
                             && !TextUtils.isEmpty(mCamera.getCameraId())
                             && isConnectSuccess) {
-                        String msg = parser.genMessageRealTime(mCamera.getCameraId());
-                        mClient.sendGetReadTimeIdMessage(msg);
+                        byte[] msg = parser.genMessageVODData(mCamera.getCameraId(), fileName, TIME_PLAY, PLAY_SPEED);
+                        mClient.sendGetVODDataMessage(msg);
                     }
                     return true;
                 case ARGS_WHAT_ERROR_LOGIN:
@@ -114,28 +106,30 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
     private TextView mTxtCameraInfo, mTxtCameraAddress, mTxtCameraSpeed;
     private Button mGps;
     private Camera mCamera;
+    private String fileName;
     private MapView mapView;
     private GoogleMap gMap;
     private Bundle savedInstanceState = null;
 
-    public CameraLayout(Context context, Camera camera, Bundle bundle) {
+    public PlayBackLayout(Context context, Camera camera, String fileName, Bundle bundle) {
         super(context);
         this.mCamera = camera;
         savedInstanceState = bundle;
+        this.fileName = fileName;
         initializeViews(context);
     }
 
-    public CameraLayout(Context context) {
+    public PlayBackLayout(Context context) {
         super(context);
         initializeViews(context);
     }
 
-    public CameraLayout(Context context, AttributeSet attrs) {
+    public PlayBackLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         initializeViews(context);
     }
 
-    public CameraLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+    public PlayBackLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initializeViews(context);
     }
@@ -151,7 +145,7 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
         mCameraView.setCameraId(mCamera.getCameraId());
 
         mTxtCameraInfo = (TextView) findViewById(R.id.camera_info);
-        setCameraInfo();
+        setCameraInfo(fileName);
 
         mTxtCameraAddress = (TextView) findViewById(R.id.camera_address);
         mTxtCameraAddress.setText("Ha Noi");
@@ -186,11 +180,8 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
         mTxtCameraSpeed.setText(speedStr);
     }
 
-    private void setCameraInfo() {
-        Calendar calendar = Calendar.getInstance();
-        Date date = calendar.getTime();
-        DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-        String info = String.format(INFO_FORMAT, df.format(date), mCamera.getCameraName(), mCamera.getCameraId());
+    private void setCameraInfo(String fileName) {
+        String info = String.format(INFO_FORMAT, fileName, mCamera.getCameraName(), mCamera.getCameraId());
         mTxtCameraInfo.setText(info);
     }
 
@@ -219,12 +210,12 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
     }
 
     public void initClient() {
-        if (realTimeThread != null) {
-            realTimeThread.interrupt();
-            realTimeThread = null;
+        if (playBackThread != null) {
+            playBackThread.interrupt();
+            playBackThread = null;
         }
-        realTimeThread = new RealTimeThread();
-        realTimeThread.start();
+        playBackThread = new PlayBackThread();
+        playBackThread.start();
     }
 
     @Override
@@ -235,21 +226,14 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
             mClient = null;
         }
 
-        if (realTimeThread != null) {
-            realTimeThread.interrupt();
-            realTimeThread = null;
+        if (playBackThread != null) {
+            playBackThread.interrupt();
+            playBackThread = null;
         }
 
         if (mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);
         }
-    }
-
-    public boolean sendRealTimeMessage() {
-        if (mHandler != null) {
-            mHandler.sendEmptyMessage(ARGS_WHAT_SEND_REAL_TIME);
-        }
-        return false;
     }
 
 
@@ -260,20 +244,21 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
 
     @Override
     public void handleMessage(MessageClient messageClient) {
-        if (messageClient.isLoginRealTime()) {
+        if (messageClient.isLoginGetData()) {
             Log.d("Camera: ", "HungHN: " + messageClient.getDataToString());
-            if (!TextUtils.isEmpty(messageClient.getDataToString())) {
-                isConnectSuccess = false;
+            if (!TextUtils.isEmpty(messageClient.getDataToString())
+                    && !isConnectSuccess) {
+                isConnectSuccess = true;
                 if (mHandler != null) {
-                    mHandler.sendEmptyMessage(ARGS_WHAT_ERROR_LOGIN);
+                    mHandler.sendEmptyMessageDelayed(ARGS_WHAT_SEND_PLAY_BACK, 2000);
                 }
             }
-        } else if (messageClient.isRealTime()) {
-            android.os.Message realTimeMsg = new android.os.Message();
-            realTimeMsg.what = ARGS_WHAT_REAL_TIME;
-            realTimeMsg.obj = parser.parseRealTimeMessage(messageClient);
+        } else if (messageClient.isVOData()) {
+            android.os.Message message = new android.os.Message();
+            message.what = ARGS_WHAT_PLAY_BACK;
+            message.obj = parser.parseVODMessage(messageClient);
             if (mHandler != null) {
-                mHandler.sendMessage(realTimeMsg);
+                mHandler.sendMessage(message);
             }
         }
     }
@@ -296,7 +281,7 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
         gMap.moveCamera(CameraUpdateFactory.newLatLng(cam));
     }
 
-    class RealTimeThread extends Thread {
+    class PlayBackThread extends Thread {
         @Override
         public void run() {
             super.run();
@@ -306,16 +291,11 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
                     mClient = null;
                 }
                 UserPref userPref = UserPref.getInstance();
-                mClient = new Client(userPref.getServerAddress(), Config.SERVER_PORT);
-                mClient.addIMessageListener(CameraLayout.this);
+                mClient = new Client(userPref.getServerAddress(), Config.SERVER_STORE_PORT);
+                mClient.addIMessageListener(PlayBackLayout.this);
 
-                String msg = parser.genLoginRealTime(userPref.getUserName(), userPref.getPassword());
-                mClient.sendLoginReadTimeMessage(msg);
-
-                if (mHandler != null) {
-                    mHandler.sendEmptyMessageDelayed(ARGS_WHAT_SEND_REAL_TIME, 2000);
-                }
-                isConnectSuccess = true;
+                String msg = parser.genLoginCallBack(userPref.getUserName(), userPref.getPassword());
+                mClient.sendLoginGetDataMessage(msg);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -328,7 +308,7 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
         }
     }
 
-    public void mapViewPause() {
+    public void mapViewOnPause() {
         if (mapView != null) {
             mapView.onPause();
         }

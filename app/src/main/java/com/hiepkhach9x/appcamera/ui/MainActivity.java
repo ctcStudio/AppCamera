@@ -27,7 +27,8 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
     public static final String TAG_LOGIN = "LOGIN-FRAGMENT";
     public static final String TAG_HOME = "HOME-FRAGMENT";
     public static final String TAG_CAMERA = "CAMERA-FRAGMENT";
-    public static final String TAG_PLAY_BACK = "TAG-PLAYBACK";
+    public static final String TAG_PLAY_BACK = "TAG-PLAYBACK-FRAGMENT";
+    public static final String TAG_VOD = "VOD-FRAGMENT";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

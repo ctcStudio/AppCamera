@@ -6,6 +6,7 @@ import android.location.Geocoder;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.hiepkhach9x.appcamera.MyApplication;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
 
 import java.io.IOException;
@@ -26,6 +27,7 @@ public class GpsInfo implements Parcelable {
     private String alt; // MSL Altitude. Unit is meters.
     private double speed; // Speed Over Ground. Unit is knots. Cần chuyển về km/h bằng cách nhân với 1.852
     private String course; // Course. Degrees. Hướng chạy của camera với giá trị 0 độ đến 360 độ
+    private String address;
 
     public GpsInfo() {
     }
@@ -95,6 +97,8 @@ public class GpsInfo implements Parcelable {
             if (element.length > 8) {
                 alt = element[8];
             }
+
+            address = getAddressFromGps();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -190,6 +194,10 @@ public class GpsInfo implements Parcelable {
         parcel.writeString(course);
     }
 
+    public String getAddress() {
+        return address;
+    }
+
     /**
      * @param pos DDMM.MMMM format
      * @return to double
@@ -200,18 +208,19 @@ public class GpsInfo implements Parcelable {
         return degrees + minutes / 60;
     }
 
-    public String getAddressFromGps(Context context) {
+    public String getAddressFromGps() {
         try {
             Geocoder geocoder;
             List<Address> addresses;
-            geocoder = new Geocoder(context, Locale.getDefault());
-
+            geocoder = new Geocoder(MyApplication.get(), Locale.getDefault());
             addresses = geocoder.getFromLocation(getLat(), getLog(), 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
 
             String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
             return address;
         } catch (IOException ex) {
             ex.printStackTrace();
+        } catch (Exception e) {
+
         }
         return "";
     }

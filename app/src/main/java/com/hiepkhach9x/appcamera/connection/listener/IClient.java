@@ -19,7 +19,11 @@ public interface IClient {
 
     boolean sendGetDataMessage(String message);
 
+    boolean sendGetVODDataMessage(byte[] message);
+
     boolean sendMessage(String message);
+
+    boolean sendMessage(byte[] bytes);
 
     void dispose();
 

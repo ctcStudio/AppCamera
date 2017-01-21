@@ -8,6 +8,7 @@ import android.os.Message;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
 import android.widget.ListView;
@@ -61,6 +62,7 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
     private Date fromDate, toDate;
     private ArrayList<StoreData> storeDataList;
     private ArrayAdapter storeAdapter;
+    private Camera currentCamera;
 
     private boolean hasLoginSuccess;
     private Client playBackClient;
@@ -72,9 +74,9 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
         public boolean handleMessage(Message message) {
             switch (message.what) {
                 case ARGS_WHAT_SEND_PLAY_BACK:
-                    Camera camera = mCameras.get(spinnerCamera.getSelectedItemPosition());
+                    currentCamera = mCameras.get(spinnerCamera.getSelectedItemPosition());
                     ArrayList<String> listId = new ArrayList<>();
-                    listId.add(camera.getCameraId());
+                    listId.add(currentCamera.getCameraId());
                     String msg = messageParser.genMessagePlayBack(convertDateToString(fromDate),
                             convertDateToString(toDate), listId);
                     if (playBackClient != null)
@@ -137,6 +139,17 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
 
         storeAdapter = new ArrayAdapter(getContext(),android.R.layout.simple_list_item_1, storeDataList);
         listData.setAdapter(storeAdapter);
+
+        listData.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                StoreData storeData = storeDataList.get(position);
+                VODFragment vodFragment = VODFragment.newInstance(currentCamera,storeData);
+                if(mNavigateManager!=null) {
+                    mNavigateManager.addPage(vodFragment,MainActivity.TAG_VOD);
+                }
+            }
+        });
     }
 
     @Override
@@ -156,7 +169,7 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
             public void run() {
                 disposeClient();
                 String server = UserPref.getInstance().getServerAddress();
-                playBackClient = new Client(server, Config.SERVER_PORT + 1);
+                playBackClient = new Client(server, Config.SERVER_STORE_PORT);
                 playBackClient.addIMessageListener(playBackListener);
 
                 String msg = messageParser.genLoginCallBack(UserPref.getInstance().getUserName(),
@@ -166,6 +179,7 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
             }
         };
         showDialog();
+        storeDataList.clear();
         new Thread(runnable).start();
     }
 
