@@ -108,15 +108,13 @@ public class ListCameraFragment extends BaseFragment implements OnMapReadyCallba
             @Override
             public void onClick(View v) {
                 layoutImage.setVisibility(View.GONE);
+                mapFull.setVisibility(View.GONE);
+                for (CameraLayout cameraLayout : listCameraLayout) {
+                    cameraLayout.removeUpdateCameraInfo();
+                }
             }
         });
 
-        mapFull.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mapFull.setVisibility(View.GONE);
-            }
-        });
     }
 
     @Override
@@ -191,6 +189,16 @@ public class ListCameraFragment extends BaseFragment implements OnMapReadyCallba
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.gMap = googleMap;
+        gMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                layoutImage.setVisibility(View.GONE);
+                mapFull.setVisibility(View.GONE);
+                for (CameraLayout cameraLayout : listCameraLayout) {
+                    cameraLayout.removeUpdateCameraInfo();
+                }
+            }
+        });
     }
 
     private void showGpsLocation(double lat, double log) {
@@ -244,8 +252,8 @@ public class ListCameraFragment extends BaseFragment implements OnMapReadyCallba
     }
 
     public boolean goBack() {
-        if(layoutImage.getVisibility() != View.VISIBLE
-                || mapFull.getVisibility() != View.VISIBLE) {
+        if(layoutImage.getVisibility() == View.VISIBLE
+                || mapFull.getVisibility() == View.VISIBLE) {
             layoutImage.setVisibility(View.GONE);
             mapFull.setVisibility(View.GONE);
             return false;

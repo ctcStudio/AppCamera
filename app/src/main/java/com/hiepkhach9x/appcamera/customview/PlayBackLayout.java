@@ -57,6 +57,8 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
     private Client mClient;
     private PlayBackThread playBackThread;
     private MessageParser parser;
+    private ClickCameraInterface cameraListener;
+    private UpdateVodInfo updateVodInfo;
     private boolean isConnectSuccess;
     private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
@@ -73,7 +75,7 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
                                 mCameraView.setBackgroundDrawable(drawable);
                             }
                         }
-                        if(TextUtils.isEmpty(voData.getFileName())) {
+                        if (TextUtils.isEmpty(voData.getFileName())) {
                             setCameraInfo(voData.getFileName());
                         }
                         if (voData.getGpsData() != null) {
@@ -81,6 +83,9 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
                             setCameraSpeed((int) gpsInfo.getSpeedKm());
                             showGpsLocation(gpsInfo.getLat(), gpsInfo.getLog());
                             mTxtCameraAddress.setText(gpsInfo.getAddress());
+                        }
+                        if (updateVodInfo != null) {
+                            updateVodInfo.onUpdateInfo(voData);
                         }
                     }
                     return true;
@@ -170,6 +175,15 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
                 } else {
                     mapView.setVisibility(VISIBLE);
                     mGps.setText("hide Gps");
+                }
+            }
+        });
+
+        mCameraView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (cameraListener != null) {
+                    cameraListener.onClickCamera(mCamera.getCameraId());
                 }
             }
         });
@@ -268,6 +282,14 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
         Log.d("HungHN", "init map for camera : " + mCamera.getCameraId());
         gMap = googleMap;
         //showGpsLocation(21.131, 105.803);
+        gMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                if (cameraListener != null) {
+                    cameraListener.onClickMap(mCamera.getCameraId());
+                }
+            }
+        });
     }
 
     private void showGpsLocation(double lat, double log) {
@@ -279,6 +301,10 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
         gMap.addMarker(markerOptions);
         gMap.setMinZoomPreference(15.0f);
         gMap.moveCamera(CameraUpdateFactory.newLatLng(cam));
+    }
+
+    public void removeUpdateVodInfo() {
+        this.updateVodInfo = null;
     }
 
     class PlayBackThread extends Thread {
@@ -324,5 +350,25 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
         if (mapView != null) {
             mapView.onLowMemory();
         }
+    }
+
+    public boolean hasCamera(String cameraId) {
+        if (mCamera == null) {
+            return false;
+        }
+
+        return mCamera.getCameraId().equals(cameraId);
+    }
+
+    public void setCameraListener(ClickCameraInterface cameraListener) {
+        this.cameraListener = cameraListener;
+    }
+
+    public void setUpdateVodInfo(UpdateVodInfo updateVodInfo) {
+        this.updateVodInfo = updateVodInfo;
+    }
+
+    public interface UpdateVodInfo {
+        void onUpdateInfo(VOData realTime);
     }
 }
