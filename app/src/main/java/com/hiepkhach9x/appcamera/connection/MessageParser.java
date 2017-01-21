@@ -10,6 +10,8 @@ import com.hiepkhach9x.appcamera.entities.Device;
 import com.hiepkhach9x.appcamera.entities.GpsInfo;
 import com.hiepkhach9x.appcamera.entities.MessageClient;
 import com.hiepkhach9x.appcamera.entities.RealTime;
+import com.hiepkhach9x.appcamera.entities.StoreData;
+import com.hiepkhach9x.appcamera.preference.UserPref;
 import com.hiepkhach9x.appcamera.util.BitConverter;
 
 import java.util.ArrayList;
@@ -22,6 +24,9 @@ import java.util.Arrays;
 public class MessageParser {
 
     public static final String SPERATER1 = "////";
+    public static final String SPERATER2 = "\\\\";
+    public static final String BEGIN = "@begin@";
+    public static final String BACKSLASH = "\\";
     public static final String COMA = ",";
     public static final String KEY_GPS = "<GPS>";
     public static final String KEY_GPS_INFO = "+CGPSINFO:";
@@ -136,6 +141,23 @@ public class MessageParser {
         return null;
     }
 
+    public ArrayList<StoreData> parseMessagePlayBack(MessageClient messageClient) {
+        if (messageClient == null || !messageClient.isStoreData()) {
+            return null;
+        }
+        String data = messageClient.getDataToString();
+        data = data.replace("@message@timkiemxemlai@message@", "");
+        String[] datas = data.split(BEGIN);
+        ArrayList<StoreData> storeDatas = new ArrayList<>();
+        for (String str : datas) {
+            if(str.contains(BACKSLASH)) {
+                StoreData storeData = new StoreData(str);
+                storeDatas.add(storeData);
+            }
+        }
+        return storeDatas;
+    }
+
     public String genMessageCheckOnline(ArrayList<String> listId) {
         StringBuilder builder = new StringBuilder("@message@checkonline@message@////");
         for (String id : listId) {
@@ -160,7 +182,13 @@ public class MessageParser {
         return "@haicuong@:" + userName + ":" + password;
     }
 
-    public String genMessagePlayBack(String fromDate, String toDate, String cameraId) {
-        return null;
+    public String genMessagePlayBack(String fromDate, String toDate, ArrayList<String> listId) {
+        String userName = UserPref.getInstance().getUserName();
+        String pass = UserPref.getInstance().getPassword();
+        StringBuilder builder = new StringBuilder("@message@timkiemxemlai@message@");
+        for (String id : listId) {
+            builder.append("@begin@" + userName + SPERATER1 + pass + SPERATER1 + id + SPERATER1 + fromDate + SPERATER1 + toDate);
+        }
+        return builder.toString();
     }
 }

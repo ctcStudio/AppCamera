@@ -11,16 +11,15 @@ import java.util.regex.Pattern;
  * Created by hungnh on 1/20/17.
  */
 
-public class GpsInfo implements Parcelable{
+public class GpsInfo implements Parcelable {
     private double lat; // Latitude of current position. Output format is ddmm.mmmmmm
     private String northOrSouth; // N or S
     private double log; // Longitude of current position. Output format is dddmm.mmmmmm
     private String eastOrWest; // E or W
     private String date; // Date. Output format is ddmmyy
     private String utcTime; // UTC Time. Output format is hhmmss.s
+    private String alt; // MSL Altitude. Unit is meters.
     private double speed; // Speed Over Ground. Unit is knots. Cần chuyển về km/h bằng cách nhân với 1.852
-    private String ampI; // The value of AmpI.
-    private String ampQ; // The value of AmpQ.
     private String course; // Course. Degrees. Hướng chạy của camera với giá trị 0 độ đến 360 độ
 
     public GpsInfo() {
@@ -38,8 +37,7 @@ public class GpsInfo implements Parcelable{
         date = in.readString();
         utcTime = in.readString();
         speed = in.readDouble();
-        ampI = in.readString();
-        ampQ = in.readString();
+        alt = in.readString();
         course = in.readString();
     }
 
@@ -56,9 +54,11 @@ public class GpsInfo implements Parcelable{
     };
 
     private void parseGps(String gps) {
-        int startInfo = gps.indexOf(MessageParser.KEY_GPS_INFO);
-        String[] element = gps.substring(startInfo + MessageParser.KEY_GPS_INFO.length())
-                .split(MessageParser.COMA);
+//        int startInfo = gps.indexOf(MessageParser.KEY_GPS_INFO);
+//        String[] element = gps.substring(startInfo + MessageParser.KEY_GPS_INFO.length())
+//                .split(MessageParser.COMA);
+        gps = gps.replace(MessageParser.KEY_GPS_INFO, "");
+        String[] element = gps.split(MessageParser.COMA);
         try {
             if (element.length > 0) {
                 lat = Double.parseDouble(element[0]);
@@ -79,14 +79,16 @@ public class GpsInfo implements Parcelable{
             if (element.length > 5) {
                 utcTime = element[5];
             }
+
             if (element.length > 6) {
-                speed = Math.abs(Double.parseDouble(element[6]));
+                alt = element[6];
             }
+
             if (element.length > 7) {
-                ampI = element[7];
+                speed = Math.abs(Double.parseDouble(element[7]));
             }
             if (element.length > 8) {
-                ampQ = element[8];
+                alt = element[8];
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -141,6 +143,10 @@ public class GpsInfo implements Parcelable{
         this.utcTime = utcTime;
     }
 
+    public void setAlt(String alt) {
+        this.alt = alt;
+    }
+
     public double getSpeed() {
         return speed;
     }
@@ -151,22 +157,6 @@ public class GpsInfo implements Parcelable{
 
     public double getSpeedKm() {
         return speed * 1.852;
-    }
-
-    public String getAmpI() {
-        return ampI;
-    }
-
-    public void setAmpI(String ampI) {
-        this.ampI = ampI;
-    }
-
-    public String getAmpQ() {
-        return ampQ;
-    }
-
-    public void setAmpQ(String ampQ) {
-        this.ampQ = ampQ;
     }
 
     public String getCourse() {
@@ -191,8 +181,7 @@ public class GpsInfo implements Parcelable{
         parcel.writeString(date);
         parcel.writeString(utcTime);
         parcel.writeDouble(speed);
-        parcel.writeString(ampI);
-        parcel.writeString(ampQ);
+        parcel.writeString(alt);
         parcel.writeString(course);
     }
 }
