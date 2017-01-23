@@ -33,6 +33,16 @@ public abstract class BaseFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mNavigateManager != null) {
+            mNavigateManager.syncTitle();
+            mNavigateManager.syncLeftButton();
+            mNavigateManager.syncRightButton();
+        }
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

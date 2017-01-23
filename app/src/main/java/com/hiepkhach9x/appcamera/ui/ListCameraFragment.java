@@ -8,9 +8,11 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -62,6 +64,8 @@ public class ListCameraFragment extends BaseFragment implements OnMapReadyCallba
         if (listCamera == null) {
             listCamera = new ArrayList<>();
         }
+        
+        MapsInitializer.initialize(getContext());
     }
 
     @Override
@@ -216,7 +220,7 @@ public class ListCameraFragment extends BaseFragment implements OnMapReadyCallba
     @Override
     public void onUpdateInfo(RealTime realTime) {
         if (realTime.getPictureData() != null) {
-           imageFull.setImageBitmap(realTime.getPictureData());
+            imageFull.setImageBitmap(realTime.getPictureData());
         }
         if (realTime.getGpsData() != null) {
             GpsInfo gpsInfo = realTime.getGpsData();
@@ -252,7 +256,7 @@ public class ListCameraFragment extends BaseFragment implements OnMapReadyCallba
     }
 
     public boolean goBack() {
-        if(layoutImage.getVisibility() == View.VISIBLE
+        if (layoutImage.getVisibility() == View.VISIBLE
                 || mapFull.getVisibility() == View.VISIBLE) {
             layoutImage.setVisibility(View.GONE);
             mapFull.setVisibility(View.GONE);

@@ -1,5 +1,7 @@
 package com.hiepkhach9x.appcamera.ui;
 
+import com.hiepkhach9x.appcamera.entities.Camera;
+
 import java.util.ArrayList;
 
 /**
@@ -17,4 +19,8 @@ public interface LoginClient {
     void closeClient();
 
     boolean isClientAlive();
+
+    void setListCamera(ArrayList<Camera> cameras);
+
+    ArrayList<Camera> getListCamera();
 }

@@ -23,7 +23,7 @@ import java.util.TimerTask;
  * Created by hungh on 1/4/2017.
  */
 
-public class HomeFragment extends BaseFragment implements View.OnClickListener {
+public class HomeFragment extends BaseFragment{
     private static final String ARGS_CAMERA = "args.devices";
 
     public static HomeFragment newInstance(ArrayList<Camera> cameras) {
@@ -56,7 +56,7 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener {
                 && (mCameras != null & !mCameras.isEmpty())) {
             for (Camera camera : mCameras) {
                 if (listOnline.contains(camera.getCameraId())) {
-                    Log.d("HungHN","has contains: " + camera.getCameraId());
+                    Log.d("HungHN", "has contains: " + camera.getCameraId());
                     cameras.add(camera);
                 }
             }
@@ -92,8 +92,6 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        view.findViewById(R.id.real_time).setOnClickListener(this);
-        view.findViewById(R.id.play_back).setOnClickListener(this);
         lisCamera = (ListView) view.findViewById(R.id.list_camera);
         deviceAdapter = new CameraAdapter(getContext(), mCameras);
         lisCamera.setAdapter(deviceAdapter);
@@ -157,6 +155,9 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener {
                         if (deviceAdapter != null) {
                             deviceAdapter.notifyDataSetChanged();
                         }
+                        if (mLoginClient != null) {
+                            mLoginClient.setListCamera(mCameras);
+                        }
                     }
                 });
             }
@@ -175,23 +176,19 @@ public class HomeFragment extends BaseFragment implements View.OnClickListener {
         }
     }
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.real_time:
-                ArrayList<Camera> cameras = deviceAdapter.getCameraSelected();
-                if (mLoginClient != null && mLoginClient.isClientAlive()
-                        && !cameras.isEmpty()) {
-                    mLoginClient.sendCheckOnline(getListCameraIdFromDevice(cameras));
-                    isRealTime = true;
-                }
-                break;
-            case R.id.play_back:
-                PlayBackFragment playBackFragment = PlayBackFragment.newInstance(mCameras);
-                if(mNavigateManager!=null) {
-                    mNavigateManager.addPage(playBackFragment,MainActivity.TAG_PLAY_BACK);
-                }
-                break;
+    public void gotoRealTime() {
+        ArrayList<Camera> cameras = deviceAdapter.getCameraSelected();
+        if (mLoginClient != null && mLoginClient.isClientAlive()
+                && !cameras.isEmpty()) {
+            mLoginClient.sendCheckOnline(getListCameraIdFromDevice(cameras));
+            isRealTime = true;
+        }
+    }
+
+    public void gotoPlayBack() {
+        PlayBackFragment playBackFragment = PlayBackFragment.newInstance(mCameras);
+        if (mNavigateManager != null) {
+            mNavigateManager.addPage(playBackFragment, MainActivity.TAG_PLAY_BACK);
         }
     }
 }

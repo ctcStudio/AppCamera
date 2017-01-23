@@ -6,10 +6,14 @@ import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
 import com.hiepkhach9x.appcamera.Config;
 import com.hiepkhach9x.appcamera.NetworkChangeReceiver;
@@ -17,6 +21,7 @@ import com.hiepkhach9x.appcamera.R;
 import com.hiepkhach9x.appcamera.connection.Client;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
 import com.hiepkhach9x.appcamera.connection.listener.IMessageListener;
+import com.hiepkhach9x.appcamera.entities.Camera;
 import com.hiepkhach9x.appcamera.entities.MessageClient;
 import com.hiepkhach9x.appcamera.preference.UserPref;
 import com.hiepkhach9x.appcamera.util.NetworkUtils;
@@ -30,10 +35,16 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
     public static final String TAG_PLAY_BACK = "TAG-PLAYBACK-FRAGMENT";
     public static final String TAG_VOD = "VOD-FRAGMENT";
 
+    private Button btnLeft, btnRight;
+    private TextView txtTitle;
+    private ArrayList<Camera> cameras;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        initActionBar();
+
         Fragment fragment = getActivePage();
         if (fragment == null) {
             LoginFragment loginFragment = new LoginFragment();
@@ -41,6 +52,25 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
         }
 
         NetworkChangeReceiver.setConnectivityReceiverListener(this);
+    }
+
+    private void initActionBar() {
+        // Inflate your custom layout
+        final View actionBarLayout = getLayoutInflater().inflate(R.layout.layout_actionbar, null);
+        btnLeft = (Button) actionBarLayout.findViewById(R.id.button_left);
+        btnRight = (Button) actionBarLayout.findViewById(R.id.button_right);
+        txtTitle = (TextView) actionBarLayout.findViewById(R.id.text_center);
+        btnLeft.setOnClickListener(actionLeftClickListener);
+        btnRight.setOnClickListener(actionRightClickListener);
+
+        // Set up your ActionBar
+        final ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayShowHomeEnabled(false);
+            actionBar.setDisplayShowTitleEnabled(false);
+            actionBar.setDisplayShowCustomEnabled(true);
+            actionBar.setCustomView(actionBarLayout);
+        }
     }
 
     @Override
@@ -98,6 +128,75 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
     @Override
     public void syncTitle() {
 
+    }
+
+    View.OnClickListener actionLeftClickListener = new View.OnClickListener() {
+
+        @Override
+        public void onClick(View view) {
+            Fragment activePage = getActivePage();
+            if (activePage instanceof HomeFragment) {
+                ((HomeFragment) activePage).gotoPlayBack();
+            } else if (activePage instanceof ListCameraFragment
+                    || activePage instanceof PlayBackFragment
+                    || activePage instanceof VODFragment) {
+                onBackPressed();
+            }
+        }
+    };
+
+    @Override
+    public void syncLeftButton() {
+        Fragment activePage = getActivePage();
+        int visibility = View.VISIBLE;
+        String text = "Back";
+        if (activePage instanceof LoginFragment) {
+            visibility = View.GONE;
+        } else if (activePage instanceof HomeFragment) {
+            visibility = View.VISIBLE;
+            text = "PlayBack";
+        } else if (activePage instanceof ListCameraFragment) {
+            visibility = View.VISIBLE;
+        } else if (activePage instanceof PlayBackFragment) {
+            visibility = View.VISIBLE;
+            text = "RealTime";
+        } else if (activePage instanceof VODFragment) {
+            visibility = View.VISIBLE;
+        }
+        btnLeft.setText(text);
+        btnLeft.setVisibility(visibility);
+    }
+
+
+    View.OnClickListener actionRightClickListener = new View.OnClickListener() {
+
+        @Override
+        public void onClick(View view) {
+            Fragment activePage = getActivePage();
+            if (activePage instanceof HomeFragment) {
+                ((HomeFragment) activePage).gotoRealTime();
+            }
+        }
+    };
+
+    @Override
+    public void syncRightButton() {
+        Fragment activePage = getActivePage();
+        int visibility = View.VISIBLE;
+        String text = "RealTime";
+        if (activePage instanceof LoginFragment) {
+            visibility = View.GONE;
+        } else if (activePage instanceof HomeFragment) {
+            visibility = View.VISIBLE;
+        } else if (activePage instanceof ListCameraFragment) {
+            visibility = View.GONE;
+        } else if (activePage instanceof PlayBackFragment) {
+            visibility = View.GONE;
+        } else if (activePage instanceof VODFragment) {
+            visibility = View.GONE;
+        }
+        btnRight.setText(text);
+        btnRight.setVisibility(visibility);
     }
 
     @Override
@@ -211,5 +310,15 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
             });
             builder.show();
         }
+    }
+
+    @Override
+    public void setListCamera(ArrayList<Camera> cameras) {
+        this.cameras = cameras;
+    }
+
+    @Override
+    public ArrayList<Camera> getListCamera() {
+        return this.cameras;
     }
 }

@@ -12,5 +12,7 @@ public interface NavigateManager {
     void addPage(Fragment fragment,String tag);
     void swapPage(Fragment fragment,String tag);
     void syncTitle();
+    void syncLeftButton();
+    void syncRightButton();
     boolean checkNetworkConnected();
 }
