@@ -98,6 +98,7 @@ public class MessageParser {
         return null;
     }
 
+    private long lastGetTime = 0;
     public RealTime parseRealTimeMessage(MessageClient messageClient) {
         if (!messageClient.isRealTime()) {
             return null;
@@ -133,6 +134,10 @@ public class MessageParser {
                 gpsInfo = new GpsInfo();
             } else {
                 gpsInfo = new GpsInfo(gps);
+                if(System.currentTimeMillis() - lastGetTime > 10000) {
+                    gpsInfo.getAddress();
+                    lastGetTime = System.currentTimeMillis();
+                }
             }
             byte[] pic = Arrays.copyOfRange(bytes, beginPic, endPic + 1); // picture from 0xFF8 to 0xFF9
             final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -209,6 +214,10 @@ public class MessageParser {
             GpsInfo gpsInfo = null;
             if (!TextUtils.isEmpty(gps)) {
                 gpsInfo = new GpsInfo(gps);
+                if(System.currentTimeMillis() - lastGetTime > 10000) {
+                    gpsInfo.getAddress();
+                    lastGetTime = System.currentTimeMillis();
+                }
             }
             byte[] pic = Arrays.copyOfRange(bytes, beginPic, endPic + 1); // picture from 0xFF8 to 0xFF9
             final BitmapFactory.Options options = new BitmapFactory.Options();

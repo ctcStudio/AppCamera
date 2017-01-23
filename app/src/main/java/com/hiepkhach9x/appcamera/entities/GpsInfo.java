@@ -5,6 +5,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import com.hiepkhach9x.appcamera.MyApplication;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
@@ -43,9 +44,10 @@ public class GpsInfo implements Parcelable {
         eastOrWest = in.readString();
         date = in.readString();
         utcTime = in.readString();
-        speed = in.readDouble();
         alt = in.readString();
+        speed = in.readDouble();
         course = in.readString();
+        address = in.readString();
     }
 
     public static final Creator<GpsInfo> CREATOR = new Creator<GpsInfo>() {
@@ -176,25 +178,15 @@ public class GpsInfo implements Parcelable {
         this.course = course;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
 
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeDouble(lat);
-        parcel.writeString(northOrSouth);
-        parcel.writeDouble(log);
-        parcel.writeString(eastOrWest);
-        parcel.writeString(date);
-        parcel.writeString(utcTime);
-        parcel.writeDouble(speed);
-        parcel.writeString(alt);
-        parcel.writeString(course);
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getAddress() {
+        if(TextUtils.isEmpty(address)) {
+            address = getAddressFromGps();
+        }
         return address;
     }
 
@@ -223,5 +215,24 @@ public class GpsInfo implements Parcelable {
 
         }
         return "";
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeDouble(lat);
+        parcel.writeString(northOrSouth);
+        parcel.writeDouble(log);
+        parcel.writeString(eastOrWest);
+        parcel.writeString(date);
+        parcel.writeString(utcTime);
+        parcel.writeString(alt);
+        parcel.writeDouble(speed);
+        parcel.writeString(course);
+        parcel.writeString(address);
     }
 }

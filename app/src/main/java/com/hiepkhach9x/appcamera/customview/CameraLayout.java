@@ -311,6 +311,8 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
     }
 
     private void showGpsLocation(double lat, double log) {
+        gMap.clear();
+        Log.d("HungHN", "Gps: " + lat + " ----- log: " + log);
         LatLng cam = new LatLng(lat, log);
         MarkerOptions markerOptions = new MarkerOptions().position(cam)
                 .title(mCamera.getCameraName());
@@ -372,7 +374,7 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
     }
 
     public boolean hasCamera(String cameraId) {
-        if(mCamera == null) {
+        if (mCamera == null) {
             return false;
         }
         return mCamera.getCameraId().equals(cameraId);

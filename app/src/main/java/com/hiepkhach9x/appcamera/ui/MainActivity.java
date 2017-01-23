@@ -138,9 +138,11 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
             if (activePage instanceof HomeFragment) {
                 ((HomeFragment) activePage).gotoPlayBack();
             } else if (activePage instanceof ListCameraFragment
-                    || activePage instanceof PlayBackFragment
                     || activePage instanceof VODFragment) {
                 onBackPressed();
+            } else if (activePage instanceof PlayBackFragment) {
+                HomeFragment homeFragment = HomeFragment.newInstance(getListCamera());
+                swapPage(homeFragment,TAG_HOME);
             }
         }
     };
@@ -175,6 +177,13 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
             Fragment activePage = getActivePage();
             if (activePage instanceof HomeFragment) {
                 ((HomeFragment) activePage).gotoRealTime();
+            } else if (activePage instanceof PlayBackFragment
+                    || activePage instanceof VODFragment) {
+                HomeFragment homeFragment = HomeFragment.newInstance(getListCamera());
+                swapPage(homeFragment,TAG_HOME);
+            } else if (activePage instanceof ListCameraFragment) {
+                PlayBackFragment playBackFragment = PlayBackFragment.newInstance(getListCamera());
+                swapPage(playBackFragment,TAG_PLAY_BACK);
             }
         }
     };
@@ -189,11 +198,12 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
         } else if (activePage instanceof HomeFragment) {
             visibility = View.VISIBLE;
         } else if (activePage instanceof ListCameraFragment) {
-            visibility = View.GONE;
+            visibility = View.VISIBLE;
+            text = "PlayBack";
         } else if (activePage instanceof PlayBackFragment) {
             visibility = View.GONE;
         } else if (activePage instanceof VODFragment) {
-            visibility = View.GONE;
+            visibility = View.VISIBLE;
         }
         btnRight.setText(text);
         btnRight.setVisibility(visibility);
