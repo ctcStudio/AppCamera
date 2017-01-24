@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hiepkhach9x.appcamera.Config;
+import com.hiepkhach9x.appcamera.MyApplication;
 import com.hiepkhach9x.appcamera.R;
 import com.hiepkhach9x.appcamera.connection.Client;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
@@ -172,8 +173,8 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
                 playBackClient = new Client(server, Config.SERVER_STORE_PORT);
                 playBackClient.addIMessageListener(playBackListener);
 
-                String msg = messageParser.genLoginCallBack(UserPref.getInstance().getUserName(),
-                        UserPref.getInstance().getPassword());
+                String msg = messageParser.genLoginCallBack(MyApplication.get().getUserName(),
+                        MyApplication.get().getPassword());
                 playBackClient.sendLoginGetDataMessage(msg);
 
             }

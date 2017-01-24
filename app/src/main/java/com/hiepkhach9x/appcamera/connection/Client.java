@@ -1,8 +1,11 @@
 package com.hiepkhach9x.appcamera.connection;
 
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.hiepkhach9x.appcamera.Config;
+import com.hiepkhach9x.appcamera.MyApplication;
 import com.hiepkhach9x.appcamera.connection.listener.IClient;
 import com.hiepkhach9x.appcamera.connection.listener.IMessageListener;
 import com.hiepkhach9x.appcamera.entities.MessageClient;
@@ -11,18 +14,26 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import static android.R.attr.port;
 
 /**
  * Created by hungh on 12/27/2016.
  */
 public class Client implements IClient {
+
+    public final static String ACTION_CLIENT_RECEIVE_MESSAGE = "com.client.error";
+    public static final String EXTRA_ERROR_MESSAGE = "extra.error.message";
+    public static final int UNKNOWN_ERROR = 1;
+    public static final int TIMEOUT_ERROR = 2;
+    public static final int IO_ERROR = 3;
+    public static final int UNKNOWN_HOST_ERROR = 4;
+
+
     private final String TAG = "Client";
     private Socket mSocket;
     private InputStream inputStream;
@@ -31,7 +42,7 @@ public class Client implements IClient {
     private List<IMessageListener> listenerList;
     private MessageType mCurrentType;
 
-    public Client(String sever,int port) {
+    public Client(String sever, int port) {
         try {
             mSocket = new Socket(sever, port);
             mSocket.setSoTimeout(Config.SOCKET_TIMOUT);
@@ -40,8 +51,14 @@ public class Client implements IClient {
             outputStream = mSocket.getOutputStream();
             socketThread = new ReadSocketThread();
             socketThread.start();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (UnknownHostException e0) {
+            sendBroadcastErrorMessage(UNKNOWN_HOST_ERROR);
+        } catch (SocketTimeoutException e1) {
+            e1.printStackTrace();
+            sendBroadcastErrorMessage(TIMEOUT_ERROR);
+        } catch (IOException e2) {
+            e2.printStackTrace();
+            sendBroadcastErrorMessage(IO_ERROR);
         }
 
         listenerList = new ArrayList<>();
@@ -59,6 +76,7 @@ public class Client implements IClient {
                 return true;
             } catch (IOException e) {
                 e.printStackTrace();
+                sendBroadcastErrorMessage(IO_ERROR);
             }
         }
         return false;
@@ -74,55 +92,80 @@ public class Client implements IClient {
                 return true;
             } catch (IOException e) {
                 e.printStackTrace();
+                sendBroadcastErrorMessage(IO_ERROR);
             }
         }
         return false;
     }
 
     @Override
-    public synchronized boolean sendLoginMessage(String msg) {
+    public synchronized void sendLoginMessage(String msg) {
         mCurrentType = MessageType.LOGIN;
         //String msg = "@haicuong@:" + userName + ":" + pass;
-        return sendMessage(msg);
+        sendMessage(msg);
     }
 
     @Override
-    public synchronized boolean sendCheckOnlineMessage(String msg) {
+    public synchronized void sendCheckOnlineMessage(String msg) {
         mCurrentType = MessageType.ONLINE;
         //String msg = "@messageClient@checkonline@messageClient@////1600000000000020////1500000000010001////1600000000000025////1600000000000026////";
-        return sendMessage(msg);
+        sendMessage(msg);
     }
 
     @Override
-    public synchronized boolean sendLoginReadTimeMessage(String msg) {
+    public synchronized void sendLoginReadTimeMessage(String msg) {
         mCurrentType = MessageType.LOGIN_REALTIME;
         //String msg = "@haicuongplayer@:demo:123456";
-        return sendMessage(msg);
+        sendMessage(msg);
     }
 
     @Override
-    public synchronized boolean sendGetReadTimeIdMessage(String msg) {
+    public synchronized void sendGetReadTimeIdMessage(final String msg) {
         mCurrentType = MessageType.REALTIME;
         //String msg = "@messageClient@yeucaulive@messageClient@////1600000000000025////";
-        return sendMessage(msg);
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                sendMessage(msg);
+            }
+        };
+        new Thread(runnable).start();
     }
 
     @Override
-    public synchronized boolean sendLoginGetDataMessage(String msg) {
+    public synchronized void sendLoginGetDataMessage(final String msg) {
         mCurrentType = MessageType.LOGIN_GETDATA;
-        return sendMessage(msg);
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                sendMessage(msg);
+            }
+        };
+        new Thread(runnable).start();
     }
 
     @Override
-    public synchronized boolean sendGetDataMessage(String msg) {
+    public synchronized void sendGetDataMessage(final String msg) {
         mCurrentType = MessageType.GETDATA;
-        return sendMessage(msg);
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                sendMessage(msg);
+            }
+        };
+        new Thread(runnable).start();
     }
 
     @Override
-    public synchronized boolean sendGetVODDataMessage(byte[] msg) {
+    public synchronized void sendGetVODDataMessage(final byte[] msg) {
         mCurrentType = MessageType.VODDATA;
-        return sendMessage(msg);
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                sendMessage(msg);
+            }
+        };
+        new Thread(runnable).start();
     }
 
     public void dispose() {
@@ -137,6 +180,7 @@ public class Client implements IClient {
             }
         } catch (IOException ex) {
             ex.printStackTrace();
+            sendBroadcastErrorMessage(IO_ERROR);
         }
     }
 
@@ -212,5 +256,12 @@ public class Client implements IClient {
                 this.listener.handleMessage(messageClient);
             }
         }
+    }
+
+    public void sendBroadcastErrorMessage(int code) {
+        Intent intent = new Intent(ACTION_CLIENT_RECEIVE_MESSAGE);
+        intent.putExtra(EXTRA_ERROR_MESSAGE, code);
+        LocalBroadcastManager.getInstance(MyApplication.get())
+                .sendBroadcast(intent);
     }
 }

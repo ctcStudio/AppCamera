@@ -7,19 +7,19 @@ package com.hiepkhach9x.appcamera.connection.listener;
 
 public interface IClient {
 
-    boolean sendLoginMessage(String message);
+    void sendLoginMessage(String message);
 
-    boolean sendCheckOnlineMessage(String message);
+    void sendCheckOnlineMessage(String message);
 
-    boolean sendLoginReadTimeMessage(String message);
+    void sendLoginReadTimeMessage(String message);
 
-    boolean sendGetReadTimeIdMessage(String message);
+    void sendGetReadTimeIdMessage(String message);
 
-    boolean sendLoginGetDataMessage(String message);
+    void sendLoginGetDataMessage(String message);
 
-    boolean sendGetDataMessage(String message);
+    void sendGetDataMessage(String message);
 
-    boolean sendGetVODDataMessage(byte[] message);
+    void sendGetVODDataMessage(byte[] message);
 
     boolean sendMessage(String message);
 

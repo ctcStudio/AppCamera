@@ -23,6 +23,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.hiepkhach9x.appcamera.Config;
+import com.hiepkhach9x.appcamera.MyApplication;
 import com.hiepkhach9x.appcamera.R;
 import com.hiepkhach9x.appcamera.connection.Client;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
@@ -320,7 +321,7 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
                 mClient = new Client(userPref.getServerAddress(), Config.SERVER_STORE_PORT);
                 mClient.addIMessageListener(PlayBackLayout.this);
 
-                String msg = parser.genLoginCallBack(userPref.getUserName(), userPref.getPassword());
+                String msg = parser.genLoginCallBack(MyApplication.get().getUserName(), MyApplication.get().getPassword());
                 mClient.sendLoginGetDataMessage(msg);
             } catch (Exception e) {
                 e.printStackTrace();

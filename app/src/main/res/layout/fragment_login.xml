@@ -4,31 +4,6 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:id="@+id/layout_control"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:background="@color/colorAccent"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="invisible">
-
-        <Button
-            android:id="@+id/view_all"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="@dimen/space_largest"
-            android:text="Xem tất cả camera" />
-
-        <Button
-            android:id="@+id/view_favorites"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="@dimen/space_largest"
-            android:text="Xem camera đã lưu" />
-    </LinearLayout>
-
-    <LinearLayout
         android:id="@+id/layout_login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -65,13 +40,24 @@
             android:padding="@dimen/space_normal"
             android:textSize="@dimen/text_normal" />
 
-        <Spinner
-            android:id="@+id/serverCollections"
+        <EditText
+            android:id="@+id/server"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_large"
-            android:padding="@dimen/space_normal" />
+            android:layout_marginTop="@dimen/space_small"
+            android:hint="@string/server_address"
+            android:padding="@dimen/space_normal"
+            android:text="@string/default_server"
+            android:textSize="@dimen/text_normal" />
 
+        <CheckBox
+            android:id="@+id/save_password"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lưu thông tin đăng nhập"
+            android:button="@drawable/check_box_white"
+            android:drawablePadding="4dp"
+            android:padding="@dimen/space_smaller"/>
         <Button
             android:id="@+id/button_login"
             android:layout_width="wrap_content"

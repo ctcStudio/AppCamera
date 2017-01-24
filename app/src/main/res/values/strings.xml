@@ -4,14 +4,7 @@
     <string name="password">Password</string>
     <string name="username">UserName</string>
     <string name="select_server_collection">Select server collection</string>
-
-    <string-array name="server_collections">
-        <item>haicuong.no-ip.biz</item>
-    </string-array>
-
-    <string-array name="server_address">
-        <item>haicuong.no-ip.biz</item>
-    </string-array>
-
+    <string name="default_server">haicuong.no-ip.biz</string>
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyBQ6ZejP649LZlq11FHlFChra_Kk69r6S4</string>
+    <string name="server_address">Server Address</string>
 </resources>

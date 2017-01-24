@@ -10,6 +10,8 @@ import android.content.Context;
 public class MyApplication extends Application {
 
     private static MyApplication mApp;
+    private String userName;
+    private String password;
 
     @Override
     public void onCreate() {
@@ -22,7 +24,23 @@ public class MyApplication extends Application {
         super.onTerminate();
     }
 
-    public static Context get() {
+    public static MyApplication get() {
         return mApp;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }

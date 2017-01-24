@@ -1,11 +1,15 @@
 package com.hiepkhach9x.appcamera.ui;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -39,6 +43,21 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
     private TextView txtTitle;
     private ArrayList<Camera> cameras;
 
+    private BroadcastReceiver mClientReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (Client.ACTION_CLIENT_RECEIVE_MESSAGE.equals(action)) {
+                int code = intent.getIntExtra(Client.EXTRA_ERROR_MESSAGE, -1);
+                showDialogErrorCode(code);
+                Fragment activePage = getActivePage();
+                if (activePage instanceof BaseFragment) {
+                    ((BaseFragment) activePage).dismissDialog();
+                }
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,6 +71,11 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
         }
 
         NetworkChangeReceiver.setConnectivityReceiverListener(this);
+
+
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Client.ACTION_CLIENT_RECEIVE_MESSAGE);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mClientReceiver, intentFilter);
     }
 
     private void initActionBar() {
@@ -83,6 +107,9 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
     protected void onDestroy() {
         super.onDestroy();
         closeClient();
+        if (mClientReceiver != null) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(mClientReceiver);
+        }
     }
 
     @Override
@@ -142,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
                 onBackPressed();
             } else if (activePage instanceof PlayBackFragment) {
                 HomeFragment homeFragment = HomeFragment.newInstance(getListCamera());
-                swapPage(homeFragment,TAG_HOME);
+                swapPage(homeFragment, TAG_HOME);
             }
         }
     };
@@ -161,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
             visibility = View.VISIBLE;
         } else if (activePage instanceof PlayBackFragment) {
             visibility = View.VISIBLE;
-            text = "RealTime";
+            text = "Online";
         } else if (activePage instanceof VODFragment) {
             visibility = View.VISIBLE;
         }
@@ -180,10 +207,10 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
             } else if (activePage instanceof PlayBackFragment
                     || activePage instanceof VODFragment) {
                 HomeFragment homeFragment = HomeFragment.newInstance(getListCamera());
-                swapPage(homeFragment,TAG_HOME);
+                swapPage(homeFragment, TAG_HOME);
             } else if (activePage instanceof ListCameraFragment) {
                 PlayBackFragment playBackFragment = PlayBackFragment.newInstance(getListCamera());
-                swapPage(playBackFragment,TAG_PLAY_BACK);
+                swapPage(playBackFragment, TAG_PLAY_BACK);
             }
         }
     };
@@ -192,7 +219,7 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
     public void syncRightButton() {
         Fragment activePage = getActivePage();
         int visibility = View.VISIBLE;
-        String text = "RealTime";
+        String text = "Online";
         if (activePage instanceof LoginFragment) {
             visibility = View.GONE;
         } else if (activePage instanceof HomeFragment) {
@@ -280,11 +307,17 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
     }
 
     @Override
-    public void sendCheckOnline(ArrayList<String> strings) {
-        if (isClientAlive()) {
-            MessageParser parser = new MessageParser();
-            mClient.sendCheckOnlineMessage(parser.genMessageCheckOnline(strings));
-        }
+    public void sendCheckOnline(final ArrayList<String> strings) {
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (isClientAlive()) {
+                    MessageParser parser = new MessageParser();
+                    mClient.sendCheckOnlineMessage(parser.genMessageCheckOnline(strings));
+                }
+            }
+        };
+        new Thread(runnable).start();
     }
 
     @Override
@@ -309,10 +342,7 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     Fragment currentPage = getActivePage();
-                    if (currentPage instanceof LoginClient) {
-                        LoginFragment fragment = (LoginFragment) currentPage;
-                        fragment.switchToLogin();
-                    } else {
+                    if (!(currentPage instanceof LoginClient)) {
                         LoginFragment loginFragment = new LoginFragment();
                         swapPage(loginFragment, TAG_LOGIN);
                     }
@@ -330,5 +360,38 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
     @Override
     public ArrayList<Camera> getListCamera() {
         return this.cameras;
+    }
+
+    private void showDialogErrorCode(final int code) {
+        if (code == -1) {
+            return;
+        }
+        String title = "Error";
+        String message = "";
+        switch (code) {
+            case Client.TIMEOUT_ERROR:
+                message = "Không th kết nối được đến server";
+                break;
+            case Client.IO_ERROR:
+                message = "Lỗi gửi nhận dữ liệu";
+                break;
+            case Client.UNKNOWN_HOST_ERROR:
+                message = "Không có địa chỉ nào kết nối đến server bạn vừa nhập";
+                break;
+            case Client.UNKNOWN_ERROR:
+            default:
+                message = "unknowns error";
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        builder.show();
     }
 }

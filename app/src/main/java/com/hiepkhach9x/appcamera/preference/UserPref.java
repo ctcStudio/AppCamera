@@ -43,7 +43,7 @@ public class UserPref {
     }
 
     public String getServerAddress() {
-        return mSharedPreferences.getString(KEY_SERVER_ADDRESS, "");
+        return mSharedPreferences.getString(KEY_SERVER_ADDRESS, "haicuong.no-ip.biz");
     }
 
     public boolean saveUserName(String address) {
@@ -51,7 +51,7 @@ public class UserPref {
     }
 
     public String getUserName() {
-        return mSharedPreferences.getString(KEY_USER_NAME, "demo");
+        return mSharedPreferences.getString(KEY_USER_NAME, "");
     }
 
     public boolean savePassword(String address) {
@@ -59,7 +59,7 @@ public class UserPref {
     }
 
     public String getPassword() {
-        return mSharedPreferences.getString(KEY_PASSWORD, "123456");
+        return mSharedPreferences.getString(KEY_PASSWORD, "");
     }
 
     public boolean saveListCameraFavorite(ArrayList<String> cameraList) {

@@ -11,6 +11,7 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.hiepkhach9x.appcamera.Config;
+import com.hiepkhach9x.appcamera.MyApplication;
 import com.hiepkhach9x.appcamera.R;
 import com.hiepkhach9x.appcamera.connection.Client;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
@@ -53,8 +54,7 @@ public class CameraView extends ImageView implements IMessageListener {
                     return true;
                 case ARGS_WHAT_SEND_LOGIN_REAL_TIME:
                     if (mClient != null) {
-                        UserPref userPref = UserPref.getInstance();
-                        String msg = parser.genLoginRealTime(userPref.getUserName(), userPref.getPassword());
+                        String msg = parser.genLoginRealTime(MyApplication.get().getUserName(), MyApplication.get().getPassword());
                         mClient.sendLoginReadTimeMessage(msg);
                     }
                     if (mHandler != null) {

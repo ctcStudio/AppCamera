@@ -1,17 +1,25 @@
 package com.hiepkhach9x.appcamera.ui;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
+import com.hiepkhach9x.appcamera.MyApplication;
 import com.hiepkhach9x.appcamera.R;
+import com.hiepkhach9x.appcamera.connection.Client;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
 import com.hiepkhach9x.appcamera.entities.Camera;
 import com.hiepkhach9x.appcamera.entities.Device;
@@ -24,17 +32,13 @@ import java.util.ArrayList;
  * Created by hungh on 1/4/2017.
  */
 
-public class LoginFragment extends BaseFragment implements View.OnClickListener {
+public class LoginFragment extends BaseFragment {
     private static final java.lang.String ARGS_HAS_LOGIN = "args.has.login";
-    private String[] serverNames;
-    private String[] listServerAddress;
 
-    private LinearLayout layoutLogin;
     private EditText edUserName;
     private EditText edPassword;
-    private Spinner spServerCollections;
-    private LinearLayout layoutControl;
-    private Button btnViewAll, btnViewFavorites;
+    private EditText edServer;
+    private CheckBox cbSavePass;
 
     private String userName, password, serverAddress;
     private boolean hasLogin;
@@ -42,18 +46,6 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
     private ArrayList<Device> devices;
     private ArrayList<String> listCamOnline;
     private MessageParser messageParser = new MessageParser();
-
-    //private Timer mTimer;
-
-    private void viewLayout() {
-        if (hasLogin) {
-            layoutLogin.setVisibility(View.INVISIBLE);
-            layoutControl.setVisibility(View.VISIBLE);
-        } else {
-            layoutControl.setVisibility(View.INVISIBLE);
-            layoutLogin.setVisibility(View.VISIBLE);
-        }
-    }
 
     private void updateDeviceOnline(ArrayList<String> listOnline) {
         if ((listOnline != null && !listOnline.isEmpty())
@@ -95,8 +87,6 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
         if (savedInstanceState != null) {
             hasLogin = savedInstanceState.getBoolean(ARGS_HAS_LOGIN);
         }
-        serverNames = getResources().getStringArray(R.array.server_collections);
-        listServerAddress = getResources().getStringArray(R.array.server_address);
     }
 
     @Override
@@ -108,32 +98,18 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        layoutLogin = (LinearLayout) view.findViewById(R.id.layout_login);
         edUserName = (EditText) view.findViewById(R.id.userName);
         edPassword = (EditText) view.findViewById(R.id.password);
-        spServerCollections = (Spinner) view.findViewById(R.id.serverCollections);
+        edServer = (EditText) view.findViewById(R.id.server);
+        cbSavePass = (CheckBox) view.findViewById(R.id.save_password);
 
-        layoutControl = (LinearLayout) view.findViewById(R.id.layout_control);
-        btnViewAll = (Button) view.findViewById(R.id.view_all);
-        btnViewFavorites = (Button) view.findViewById(R.id.view_favorites);
-        btnViewAll.setOnClickListener(this);
-        btnViewFavorites.setOnClickListener(this);
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, serverNames);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spServerCollections.setAdapter(adapter);
-        spServerCollections.setSelection(0);
 
         view.findViewById(R.id.button_login).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 userName = edUserName.getText().toString();
                 password = edPassword.getText().toString();
-                serverAddress = listServerAddress[spServerCollections.getSelectedItemPosition()];
-                UserPref userPref = UserPref.getInstance();
-                userPref.saveServerAddress(serverAddress);
-                userPref.saveUserName(userName);
-                userPref.savePassword(password);
+                serverAddress = edServer.getText().toString();
                 login();
             }
         });
@@ -141,12 +117,13 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
         UserPref userPref = UserPref.getInstance();
         edUserName.setText(userPref.getUserName());
         edPassword.setText(userPref.getPassword());
+        edServer.setText(userPref.getServerAddress());
+        cbSavePass.setChecked(!TextUtils.isEmpty(userPref.getUserName()));
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        viewLayout();
     }
 
     private ArrayList<String> getListCameraIdFromDevice() {
@@ -167,10 +144,6 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-//        if (mTimer != null) {
-//            mTimer.cancel();
-//            mTimer = null;
-//        }
     }
 
     private void login() {
@@ -180,11 +153,6 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
             }
         }
         showDialog();
-        final UserPref userPref = UserPref.getInstance();
-        userPref.saveServerAddress(serverAddress);
-        userPref.saveUserName(userName);
-        userPref.savePassword(password);
-
         Thread loginThread = new Thread() {
             @Override
             public void run() {
@@ -196,6 +164,14 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
                     }
                     sleep(200);
                     mLoginClient.sendLogin(userName, password);
+                    UserPref userPref = UserPref.getInstance();
+                    if (cbSavePass.isChecked()) {
+                        userPref.saveUserName(userName);
+                        userPref.savePassword(password);
+                    }
+                    MyApplication.get().setUserName(userName);
+                    MyApplication.get().setPassword(password);
+                    userPref.saveServerAddress(serverAddress);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -222,15 +198,6 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
             String data = messageClient.getDataToString();
             if (data.contains("ketthuckhoitaohethong")) {
                 hasLogin = true;
-                dismissDialog();
-//                new Handler(Looper.getMainLooper()).post(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        viewLayout();
-//                        //startTimer();
-//                    }
-//                });
-
                 if (mLoginClient != null && mLoginClient.isClientAlive())
                     mLoginClient.sendCheckOnline(getListCameraIdFromDevice());
 
@@ -251,52 +218,6 @@ public class LoginFragment extends BaseFragment implements View.OnClickListener 
             HomeFragment homeFragment = HomeFragment.newInstance(getListCamera());
             if (mNavigateManager != null)
                 mNavigateManager.swapPage(homeFragment, MainActivity.TAG_HOME);
-//            ListCameraFragment cameraFragment = ListCameraFragment.newInstance(listCamOnline);
-//            if (mNavigateManager != null) {
-//                mNavigateManager.addPage(cameraFragment, MainActivity.TAG_CAMERA);
-//            }
         }
-    }
-
-//    private void startTimer() {
-//        if (mTimer != null) {
-//            mTimer.cancel();
-//            mTimer = null;
-//        }
-//        mTimer = new Timer();
-//        mTimer.schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-//                if (mLoginClient != null && mLoginClient.isClientAlive()) {
-//                    mLoginClient.sendCheckOnline(getListCameraIdFromDevice());
-//                }
-//            }
-//        }, 5000, 5000);
-//    }
-
-    @Override
-    public void onClick(View view) {
-        if (mNavigateManager != null && !mNavigateManager.checkNetworkConnected()) {
-            return;
-        }
-        switch (view.getId()) {
-            case R.id.view_all:
-                if (mLoginClient != null && mLoginClient.isClientAlive())
-                    mLoginClient.sendCheckOnline(getListCameraIdFromDevice());
-                break;
-            case R.id.view_favorites:
-                ArrayList<String> listCamera = UserPref.getInstance().getListCameraFavorite();
-                if (mLoginClient != null
-                        && mLoginClient.isClientAlive()
-                        && !listCamera.isEmpty())
-                    mLoginClient.sendCheckOnline(listCamera);
-
-                break;
-        }
-    }
-
-    public void switchToLogin() {
-        hasLogin = false;
-        viewLayout();
     }
 }

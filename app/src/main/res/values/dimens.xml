@@ -8,4 +8,5 @@
     <dimen name="text_normal">14sp</dimen>
     <dimen name="space_large">14dp</dimen>
     <dimen name="space_small">8dp</dimen>
+    <dimen name="space_smaller">4dp</dimen>
 </resources>

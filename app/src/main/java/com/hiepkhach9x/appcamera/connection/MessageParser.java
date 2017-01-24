@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.hiepkhach9x.appcamera.MyApplication;
 import com.hiepkhach9x.appcamera.entities.Camera;
 import com.hiepkhach9x.appcamera.entities.Device;
 import com.hiepkhach9x.appcamera.entities.GpsInfo;
@@ -287,8 +288,8 @@ public class MessageParser {
     }
 
     public String genMessagePlayBack(String fromDate, String toDate, ArrayList<String> listId) {
-        String userName = UserPref.getInstance().getUserName();
-        String pass = UserPref.getInstance().getPassword();
+        String userName = MyApplication.get().getUserName();
+        String pass = MyApplication.get().getPassword();
         StringBuilder builder = new StringBuilder("@message@timkiemxemlai@message@");
         for (String id : listId) {
             builder.append("@begin@" + userName + SPERATER1 + pass + SPERATER1 + id + SPERATER1 + fromDate + SPERATER1 + toDate);
