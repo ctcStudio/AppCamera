@@ -6,13 +6,16 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.ExpandableListView;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.hiepkhach9x.appcamera.R;
 import com.hiepkhach9x.appcamera.adapter.CameraAdapter;
+import com.hiepkhach9x.appcamera.adapter.DeviceAdapter;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
 import com.hiepkhach9x.appcamera.entities.Camera;
+import com.hiepkhach9x.appcamera.entities.Device;
 import com.hiepkhach9x.appcamera.entities.MessageClient;
 
 import java.util.ArrayList;
@@ -23,49 +26,55 @@ import java.util.TimerTask;
  * Created by hungh on 1/4/2017.
  */
 
-public class HomeFragment extends BaseFragment{
-    private static final String ARGS_CAMERA = "args.devices";
+public class HomeFragment extends BaseFragment {
+    private static final String ARGS_DEVICE = "args.devices";
 
-    public static HomeFragment newInstance(ArrayList<Camera> cameras) {
+    public static HomeFragment newInstance(ArrayList<Device> devices) {
         Bundle args = new Bundle();
-        args.putParcelableArrayList(ARGS_CAMERA, cameras);
+        args.putParcelableArrayList(ARGS_DEVICE, devices);
         HomeFragment fragment = new HomeFragment();
         fragment.setArguments(args);
         return fragment;
     }
 
+    private ArrayList<Device> mDevices;
     private ArrayList<Camera> mCameras;
     private MessageParser mMessageParser;
 
     private void updateDeviceOnline(ArrayList<String> listOnline) {
         if ((listOnline != null && !listOnline.isEmpty())
-                && (mCameras != null & !mCameras.isEmpty())) {
-            for (Camera camera : mCameras) {
-                if (listOnline.contains(camera.getCameraId())) {
-                    camera.setOnline(true);
-                } else {
-                    camera.setOnline(false);
+                && (mDevices != null & !mDevices.isEmpty())) {
+            for (Device device : mDevices) {
+                ArrayList<Camera> cameras = device.getCameras();
+                if (cameras == null || cameras.isEmpty())
+                    continue;
+                for (Camera camera : cameras) {
+                    camera.setOnline(listOnline.contains(camera.getCameraId()));
                 }
             }
         }
     }
 
-    private ArrayList<Camera> getDeviceOnline(ArrayList<String> listOnline) {
+    private ArrayList<Camera> getCameraOnline(ArrayList<String> listOnline) {
         ArrayList<Camera> cameras = new ArrayList<>();
         if ((listOnline != null && !listOnline.isEmpty())
-                && (mCameras != null & !mCameras.isEmpty())) {
-            for (Camera camera : mCameras) {
-                if (listOnline.contains(camera.getCameraId())) {
-                    Log.d("HungHN", "has contains: " + camera.getCameraId());
-                    cameras.add(camera);
+                && (mDevices != null & !mDevices.isEmpty())) {
+            for (Device device : mDevices) {
+                ArrayList<Camera> cameraList = device.getCameras();
+                if (cameraList == null || cameraList.isEmpty())
+                    continue;
+                for (Camera camera : cameraList) {
+                    if (listOnline.contains(camera.getCameraId())) {
+                        cameras.add(camera);
+                    }
                 }
             }
         }
         return cameras;
     }
 
-    private ListView lisCamera;
-    private CameraAdapter deviceAdapter;
+    private ExpandableListView listDevice;
+    private DeviceAdapter deviceAdapter;
     private boolean isRealTime = false;
     private Timer mTimer;
 
@@ -73,28 +82,47 @@ public class HomeFragment extends BaseFragment{
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
-            mCameras = savedInstanceState.getParcelableArrayList(ARGS_CAMERA);
+            mDevices = savedInstanceState.getParcelableArrayList(ARGS_DEVICE);
         } else if (getArguments() != null) {
-            mCameras = getArguments().getParcelableArrayList(ARGS_CAMERA);
+            mDevices = getArguments().getParcelableArrayList(ARGS_DEVICE);
         }
-        if (mCameras == null) {
-            mCameras = new ArrayList<>();
+        if (mDevices == null) {
+            mDevices = new ArrayList<>();
         }
+        mCameras = getListCameraFromDevice(mDevices);
         mMessageParser = new MessageParser();
+    }
+
+    private ArrayList<Camera> getListCameraFromDevice(ArrayList<Device> mDevices) {
+        ArrayList<Camera> cameras = new ArrayList<>();
+        if ((mDevices != null & !mDevices.isEmpty())) {
+            for (Device device : mDevices) {
+                ArrayList<Camera> cameraList = device.getCameras();
+                if (cameraList == null || cameraList.isEmpty())
+                    continue;
+                cameras.addAll(cameraList);
+
+            }
+        }
+        return cameras;
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelableArrayList(ARGS_CAMERA, mCameras);
+        outState.putParcelableArrayList(ARGS_DEVICE, mDevices);
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        lisCamera = (ListView) view.findViewById(R.id.list_camera);
-        deviceAdapter = new CameraAdapter(getContext(), mCameras);
-        lisCamera.setAdapter(deviceAdapter);
+        listDevice = (ExpandableListView) view.findViewById(R.id.list_device);
+        deviceAdapter = new DeviceAdapter(getContext(), mDevices);
+        listDevice.setAdapter(deviceAdapter);
+
+        for (int i = 0; i < deviceAdapter.getGroupCount(); i++) {
+            listDevice.expandGroup(i);
+        }
     }
 
     @Override
@@ -157,13 +185,14 @@ public class HomeFragment extends BaseFragment{
                         }
                         if (mLoginClient != null) {
                             mLoginClient.setListCamera(mCameras);
+                            mLoginClient.setListDevice(mDevices);
                         }
                     }
                 });
             }
             if (isRealTime) {
                 isRealTime = false;
-                ArrayList<Camera> cameras = getDeviceOnline(listOnline);
+                ArrayList<Camera> cameras = getCameraOnline(listOnline);
                 if (cameras != null) {
                     ListCameraFragment listCameraFragment = ListCameraFragment.newInstance(cameras);
                     if (mNavigateManager != null) {

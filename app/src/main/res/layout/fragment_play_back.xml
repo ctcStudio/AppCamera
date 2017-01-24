@@ -12,9 +12,10 @@
         android:orientation="horizontal">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="@dimen/space_normal"
+            android:layout_weight="2"
             android:text="From date:"
             android:textSize="@dimen/text_largest" />
 
@@ -38,9 +39,10 @@
         android:orientation="horizontal">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="@dimen/space_normal"
+            android:layout_weight="2"
             android:text="To date:"
             android:textSize="@dimen/text_largest" />
 

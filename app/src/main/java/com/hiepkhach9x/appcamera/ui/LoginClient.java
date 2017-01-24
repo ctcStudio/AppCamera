@@ -1,6 +1,7 @@
 package com.hiepkhach9x.appcamera.ui;
 
 import com.hiepkhach9x.appcamera.entities.Camera;
+import com.hiepkhach9x.appcamera.entities.Device;
 
 import java.util.ArrayList;
 
@@ -23,4 +24,8 @@ public interface LoginClient {
     void setListCamera(ArrayList<Camera> cameras);
 
     ArrayList<Camera> getListCamera();
+
+    void setListDevice(ArrayList<Device> devices);
+
+    ArrayList<Device> getListDevice();
 }

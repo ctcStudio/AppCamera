@@ -61,6 +61,7 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
     private ClickCameraInterface cameraListener;
     private UpdateVodInfo updateVodInfo;
     private boolean isConnectSuccess;
+    private VOData lastVodData;
     private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(android.os.Message message) {
@@ -85,6 +86,7 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
                             showGpsLocation(gpsInfo.getLat(), gpsInfo.getLog());
                             mTxtCameraAddress.setText(gpsInfo.getAddress());
                         }
+                        lastVodData = voData;
                         if (updateVodInfo != null) {
                             updateVodInfo.onUpdateInfo(voData);
                         }
@@ -367,6 +369,9 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
 
     public void setUpdateVodInfo(UpdateVodInfo updateVodInfo) {
         this.updateVodInfo = updateVodInfo;
+        if (updateVodInfo != null && lastVodData != null) {
+            updateVodInfo.onUpdateInfo(lastVodData);
+        }
     }
 
     public interface UpdateVodInfo {

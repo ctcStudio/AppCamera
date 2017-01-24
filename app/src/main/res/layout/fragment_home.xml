@@ -4,9 +4,10 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <ListView
-        android:id="@+id/list_camera"
+    <ExpandableListView
+        android:id="@+id/list_device"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:dividerHeight="@dimen/space_small" />
+        android:groupIndicator="@null"/>
+
 </LinearLayout>

@@ -61,6 +61,8 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
     private ClickCameraInterface cameraListener;
     private UpdateCameraInfo updateCameraInfo;
 
+    private RealTime lastRealTimeData;
+
     private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(android.os.Message message) {
@@ -88,6 +90,7 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
                         if (updateCameraInfo != null) {
                             updateCameraInfo.onUpdateInfo(realTime);
                         }
+                        lastRealTimeData = realTime;
                     }
                     return true;
                 case ARGS_WHAT_SEND_LOGIN_REAL_TIME:
@@ -387,6 +390,9 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
 
     public void setUpdateCameraInfo(UpdateCameraInfo updateCameraInfo) {
         this.updateCameraInfo = updateCameraInfo;
+        if (updateCameraInfo != null && lastRealTimeData != null) {
+            updateCameraInfo.onUpdateInfo(lastRealTimeData);
+        }
     }
 
     public void removeUpdateCameraInfo() {

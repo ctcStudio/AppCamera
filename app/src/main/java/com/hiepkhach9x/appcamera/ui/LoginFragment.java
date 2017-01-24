@@ -1,25 +1,15 @@
 package com.hiepkhach9x.appcamera.ui;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.Spinner;
 
 import com.hiepkhach9x.appcamera.MyApplication;
 import com.hiepkhach9x.appcamera.R;
-import com.hiepkhach9x.appcamera.connection.Client;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
 import com.hiepkhach9x.appcamera.entities.Camera;
 import com.hiepkhach9x.appcamera.entities.Device;
@@ -43,14 +33,14 @@ public class LoginFragment extends BaseFragment {
     private String userName, password, serverAddress;
     private boolean hasLogin;
 
-    private ArrayList<Device> devices;
+    private ArrayList<Device> mDevices;
     private ArrayList<String> listCamOnline;
     private MessageParser messageParser = new MessageParser();
 
     private void updateDeviceOnline(ArrayList<String> listOnline) {
         if ((listOnline != null && !listOnline.isEmpty())
-                && (devices != null & !devices.isEmpty())) {
-            for (Device device : devices) {
+                && (mDevices != null & !mDevices.isEmpty())) {
+            for (Device device : mDevices) {
                 ArrayList<Camera> cameras = device.getCameras();
                 if (cameras == null || cameras.isEmpty())
                     continue;
@@ -68,8 +58,8 @@ public class LoginFragment extends BaseFragment {
 
     private ArrayList<Camera> getListCamera() {
         ArrayList<Camera> cameras = new ArrayList<>();
-        if (devices != null) {
-            for (Device device : devices) {
+        if (mDevices != null) {
+            for (Device device : mDevices) {
                 ArrayList<Camera> cameraArrayList = device.getCameras();
                 if (cameraArrayList == null || cameraArrayList.isEmpty())
                     continue;
@@ -128,7 +118,7 @@ public class LoginFragment extends BaseFragment {
 
     private ArrayList<String> getListCameraIdFromDevice() {
         ArrayList<String> strings = new ArrayList<>();
-        for (Device device : devices) {
+        for (Device device : mDevices) {
             ArrayList<Camera> cameras = device.getCameras();
             if (cameras != null) {
                 for (Camera camera : cameras) {
@@ -202,7 +192,7 @@ public class LoginFragment extends BaseFragment {
                     mLoginClient.sendCheckOnline(getListCameraIdFromDevice());
 
             } else if (data.contains("cameralistbegin")) {
-                devices = messageParser.parseDevice(messageClient.getDataToString());
+                mDevices = messageParser.parseDevice(messageClient.getDataToString());
             } else if (data.contains("khoitaohethong")) {
             }
         }
@@ -215,7 +205,7 @@ public class LoginFragment extends BaseFragment {
             updateDeviceOnline(listCamOnline);
             dismissDialog();
 
-            HomeFragment homeFragment = HomeFragment.newInstance(getListCamera());
+            HomeFragment homeFragment = HomeFragment.newInstance(mDevices);
             if (mNavigateManager != null)
                 mNavigateManager.swapPage(homeFragment, MainActivity.TAG_HOME);
         }

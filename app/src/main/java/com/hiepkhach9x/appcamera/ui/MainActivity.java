@@ -26,6 +26,7 @@ import com.hiepkhach9x.appcamera.connection.Client;
 import com.hiepkhach9x.appcamera.connection.MessageParser;
 import com.hiepkhach9x.appcamera.connection.listener.IMessageListener;
 import com.hiepkhach9x.appcamera.entities.Camera;
+import com.hiepkhach9x.appcamera.entities.Device;
 import com.hiepkhach9x.appcamera.entities.MessageClient;
 import com.hiepkhach9x.appcamera.preference.UserPref;
 import com.hiepkhach9x.appcamera.util.NetworkUtils;
@@ -42,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
     private Button btnLeft, btnRight;
     private TextView txtTitle;
     private ArrayList<Camera> cameras;
-
+    private ArrayList<Device> devices;
     private BroadcastReceiver mClientReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -168,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
                     || activePage instanceof VODFragment) {
                 onBackPressed();
             } else if (activePage instanceof PlayBackFragment) {
-                HomeFragment homeFragment = HomeFragment.newInstance(getListCamera());
+                HomeFragment homeFragment = HomeFragment.newInstance(getListDevice());
                 swapPage(homeFragment, TAG_HOME);
             }
         }
@@ -206,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
                 ((HomeFragment) activePage).gotoRealTime();
             } else if (activePage instanceof PlayBackFragment
                     || activePage instanceof VODFragment) {
-                HomeFragment homeFragment = HomeFragment.newInstance(getListCamera());
+                HomeFragment homeFragment = HomeFragment.newInstance(getListDevice());
                 swapPage(homeFragment, TAG_HOME);
             } else if (activePage instanceof ListCameraFragment) {
                 PlayBackFragment playBackFragment = PlayBackFragment.newInstance(getListCamera());
@@ -360,6 +361,16 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
     @Override
     public ArrayList<Camera> getListCamera() {
         return this.cameras;
+    }
+
+    @Override
+    public void setListDevice(ArrayList<Device> devices) {
+        this.devices = devices;
+    }
+
+    @Override
+    public ArrayList<Device> getListDevice() {
+        return this.devices;
     }
 
     private void showDialogErrorCode(final int code) {

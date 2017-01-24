@@ -29,7 +29,7 @@ public class StoreData implements Parcelable {
 
     @Override
     public String toString() {
-        return cameraId + MessageParser.BACKSLASH + fileName;
+        return cameraId + " - " + fileName;
     }
 
     public String getCameraId() {
