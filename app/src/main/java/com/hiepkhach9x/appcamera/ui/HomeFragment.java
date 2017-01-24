@@ -174,22 +174,6 @@ public class HomeFragment extends BaseFragment {
         if (messageClient.isCheckOnline()) {
             Log.d("HungHN", "online: " + messageClient.getDataToString());
             final ArrayList<String> listOnline = mMessageParser.parseIdOnline(messageClient.getDataToString());
-            Activity activity = getActivity();
-            if (activity != null) {
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        updateDeviceOnline(listOnline);
-                        if (deviceAdapter != null) {
-                            deviceAdapter.notifyDataSetChanged();
-                        }
-                        if (mLoginClient != null) {
-                            mLoginClient.setListCamera(mCameras);
-                            mLoginClient.setListDevice(mDevices);
-                        }
-                    }
-                });
-            }
             if (isRealTime) {
                 isRealTime = false;
                 ArrayList<Camera> cameras = getCameraOnline(listOnline);
@@ -200,6 +184,23 @@ public class HomeFragment extends BaseFragment {
                     }
                 } else {
                     Toast.makeText(getContext(), "Camera lựa chọn không online", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Activity activity = getActivity();
+                if (activity != null) {
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            updateDeviceOnline(listOnline);
+                            if (deviceAdapter != null) {
+                                deviceAdapter.notifyDataSetChanged();
+                            }
+                            if (mLoginClient != null) {
+                                mLoginClient.setListCamera(mCameras);
+                                mLoginClient.setListDevice(mDevices);
+                            }
+                        }
+                    });
                 }
             }
         }

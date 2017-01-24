@@ -14,6 +14,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
@@ -70,9 +71,9 @@ public class Client implements IClient {
         Log.d("HungHN", "send message: " + message);
         if (mSocket != null) {
             try {
-                byte[] data = message.getBytes();
-                outputStream.write(data);
-                outputStream.flush();
+                OutputStreamWriter writer = new OutputStreamWriter(outputStream);
+                writer.write(message);
+                writer.flush();
                 return true;
             } catch (IOException e) {
                 e.printStackTrace();
