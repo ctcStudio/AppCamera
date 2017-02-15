@@ -84,7 +84,9 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
                                 GpsInfo gpsInfo = realTime.getGpsData();
                                 setCameraSpeed((int) gpsInfo.getSpeedKm());
                                 showGpsLocation(gpsInfo.getLat(), gpsInfo.getLog());
-                                mTxtCameraAddress.setText(gpsInfo.getAddress());
+                                if(TextUtils.isEmpty(gpsInfo.getAddress())) {
+                                    mTxtCameraAddress.setText(gpsInfo.getAddress());
+                                }
                             }
                         }
                         if (updateCameraInfo != null) {

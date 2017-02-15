@@ -84,7 +84,9 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
                             GpsInfo gpsInfo = voData.getGpsData();
                             setCameraSpeed((int) gpsInfo.getSpeedKm());
                             showGpsLocation(gpsInfo.getLat(), gpsInfo.getLog());
-                            mTxtCameraAddress.setText(gpsInfo.getAddress());
+                            if(TextUtils.isEmpty(gpsInfo.getAddress())) {
+                                mTxtCameraAddress.setText(gpsInfo.getAddress());
+                            }
                         }
                         lastVodData = voData;
                         if (updateVodInfo != null) {
