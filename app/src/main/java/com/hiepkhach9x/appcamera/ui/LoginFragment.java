@@ -15,6 +15,7 @@ import com.hiepkhach9x.appcamera.entities.Camera;
 import com.hiepkhach9x.appcamera.entities.Device;
 import com.hiepkhach9x.appcamera.entities.MessageClient;
 import com.hiepkhach9x.appcamera.preference.UserPref;
+import com.hiepkhach9x.appcamera.util.Utils;
 
 import java.util.ArrayList;
 
@@ -109,6 +110,13 @@ public class LoginFragment extends BaseFragment {
         edPassword.setText(userPref.getPassword());
         edServer.setText(userPref.getServerAddress());
         cbSavePass.setChecked(!TextUtils.isEmpty(userPref.getUserName()));
+
+        view.findViewById(R.id.content_main).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Utils.hideSoftKeyboard(getActivity());
+            }
+        });
     }
 
     @Override

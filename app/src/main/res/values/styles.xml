@@ -8,4 +8,11 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="default_button">
+        <item name="android:minWidth">60dp</item>
+        <item name="android:minHeight">36dp</item>
+        <item name="android:padding">@dimen/space_small</item>
+        <item name="android:background">@drawable/selector_button</item>
+        <item name="android:textColor">@drawable/text_selector</item>
+    </style>
 </resources>
