@@ -135,7 +135,7 @@ public class MessageParser {
                 gpsInfo = new GpsInfo();
             } else {
                 gpsInfo = new GpsInfo(gps);
-                if(System.currentTimeMillis() - lastGetRealTime > 10000) {
+                if(System.currentTimeMillis() - lastGetRealTime > (60 * 1000)) {
                     String address = gpsInfo.getAddressFromGps();
                     gpsInfo.setAddress(address);
                     lastGetRealTime = System.currentTimeMillis();
