@@ -9,7 +9,6 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/space_large"
         android:orientation="vertical">
 
         <com.hiepkhach9x.appcamera.customview.CameraView
@@ -27,7 +26,7 @@
             android:orientation="horizontal">
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
@@ -58,10 +57,11 @@
                 android:id="@+id/gps"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
+                android:minWidth="60dp"
                 android:layout_gravity="center_vertical|right"
                 android:layout_margin="@dimen/space_smaller"
-                android:padding="@dimen/space_small"
-                android:text="show GPS" />
+                android:textSize="@dimen/text_normal"
+                android:text="GPS" />
         </LinearLayout>
 
         <com.google.android.gms.maps.MapView

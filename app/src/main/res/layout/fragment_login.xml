@@ -29,7 +29,8 @@
             android:layout_marginTop="@dimen/space_largest"
             android:hint="@string/username"
             android:padding="@dimen/space_normal"
-            android:textSize="@dimen/text_normal" />
+            android:textSize="@dimen/text_normal"
+            android:background="@drawable/shape_border"/>
 
         <EditText
             android:id="@+id/password"
@@ -39,7 +40,8 @@
             android:hint="@string/password"
             android:inputType="textPassword"
             android:padding="@dimen/space_normal"
-            android:textSize="@dimen/text_normal" />
+            android:textSize="@dimen/text_normal"
+            android:background="@drawable/shape_border"/>
 
         <EditText
             android:id="@+id/server"
@@ -49,7 +51,8 @@
             android:hint="@string/server_address"
             android:padding="@dimen/space_normal"
             android:text="@string/default_server"
-            android:textSize="@dimen/text_normal" />
+            android:textSize="@dimen/text_normal"
+            android:background="@drawable/shape_border"/>
 
         <CheckBox
             android:id="@+id/save_password"

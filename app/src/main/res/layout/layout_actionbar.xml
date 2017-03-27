@@ -4,35 +4,59 @@
     android:layout_height="match_parent"
     android:background="@color/colorPrimary">
 
-    <Button
-        android:id="@+id/button_left"
-        style="@style/default_button"
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/text_center"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="4dp"
-        android:text="action" />
+        android:layout_toLeftOf="@+id/button_right"
+        android:layout_toRightOf="@+id/button_left"
+        android:gravity="center"
+        android:text="@string/app_name"
+        android:visibility="invisible"
+        android:textColor="@color/colorAccent"
+        android:textSize="@dimen/text_largest" />
+
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/ic_oto_logo"
+        android:scaleType="fitCenter"/>
 
     <Button
         android:id="@+id/button_right"
         style="@style/default_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="action "
+        android:gravity="right"
+        android:layout_marginRight="@dimen/space_normal"
+        android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:layout_marginRight="4dp"
-        android:text="action" />
+        android:layout_alignParentEnd="true" />
 
-    <TextView
-        android:id="@+id/text_center"
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/button_left"
+        style="@style/default_button"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_toLeftOf="@id/button_right"
-        android:layout_toRightOf="@id/button_left"
-        android:gravity="center"
-        android:text="@string/app_name"
-        android:textColor="@color/colorAccent"
-        android:textSize="@dimen/text_largest" />
+        android:text="Play back"
+        android:layout_marginLeft="@dimen/space_normal"
+        android:gravity="left"
+        android:layout_alignBaseline="@+id/button_right"
+        android:layout_alignBottom="@+id/button_right"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"/>
+
+    <ImageView
+        style="@style/default_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_arrow_back_white_48dp"
+        android:scaleType="fitCenter"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:id="@+id/imageBack"
+        android:visibility="gone"/>
 </RelativeLayout>

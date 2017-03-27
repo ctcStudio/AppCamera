@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.hiepkhach9x.appcamera.Config;
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
     public static final String TAG_VOD = "VOD-FRAGMENT";
 
     private Button btnLeft, btnRight;
+    private ImageView ivBack;
     private TextView txtTitle;
     private ArrayList<Camera> cameras;
     private ArrayList<Device> devices;
@@ -83,10 +85,12 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
         // Inflate your custom layout
         final View actionBarLayout = getLayoutInflater().inflate(R.layout.layout_actionbar, null);
         btnLeft = (Button) actionBarLayout.findViewById(R.id.button_left);
+        ivBack = (ImageView) actionBarLayout.findViewById(R.id.imageBack);
         btnRight = (Button) actionBarLayout.findViewById(R.id.button_right);
         txtTitle = (TextView) actionBarLayout.findViewById(R.id.text_center);
         btnLeft.setOnClickListener(actionLeftClickListener);
         btnRight.setOnClickListener(actionRightClickListener);
+        ivBack.setOnClickListener(actionLeftClickListener);
 
         // Set up your ActionBar
         final ActionBar actionBar = getSupportActionBar();
@@ -182,16 +186,21 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
         String text = "Back";
         if (activePage instanceof LoginFragment) {
             visibility = View.GONE;
+            ivBack.setVisibility(View.GONE);
         } else if (activePage instanceof HomeFragment) {
             visibility = View.VISIBLE;
             text = "PlayBack";
+            ivBack.setVisibility(View.GONE);
         } else if (activePage instanceof ListCameraFragment) {
-            visibility = View.VISIBLE;
+            visibility = View.GONE;
+            ivBack.setVisibility(View.VISIBLE);
         } else if (activePage instanceof PlayBackFragment) {
             visibility = View.VISIBLE;
             text = "Online";
+            ivBack.setVisibility(View.GONE);
         } else if (activePage instanceof VODFragment) {
-            visibility = View.VISIBLE;
+            visibility = View.GONE;
+            ivBack.setVisibility(View.VISIBLE);
         }
         btnLeft.setText(text);
         btnLeft.setVisibility(visibility);
@@ -233,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
         } else if (activePage instanceof VODFragment) {
             visibility = View.VISIBLE;
         }
-        btnRight.setText(text);
+        btnRight.setText(text + " ");
         btnRight.setVisibility(visibility);
     }
 

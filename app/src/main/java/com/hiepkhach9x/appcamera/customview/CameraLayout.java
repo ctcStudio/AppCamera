@@ -185,11 +185,9 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
             @Override
             public void onClick(View v) {
                 if (mapView.getVisibility() == VISIBLE) {
-                    mGps.setText("Show Gps");
                     mapView.setVisibility(GONE);
                 } else {
                     mapView.setVisibility(VISIBLE);
-                    mGps.setText("hide Gps");
                 }
             }
         });
