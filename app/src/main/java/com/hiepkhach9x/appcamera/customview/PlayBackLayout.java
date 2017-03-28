@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -34,6 +35,11 @@ import com.hiepkhach9x.appcamera.entities.MessageClient;
 import com.hiepkhach9x.appcamera.entities.VOData;
 import com.hiepkhach9x.appcamera.preference.UserPref;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
 /**
  * Created by hungh on 1/13/2017.
  */
@@ -41,7 +47,7 @@ import com.hiepkhach9x.appcamera.preference.UserPref;
 public class PlayBackLayout extends FrameLayout implements IMessageListener, OnMapReadyCallback {
     public final static String TAG = "Camera_Layout";
     private final String INFO_FORMAT = "%s %s %s";
-    private final String SPEED_FORMAT = "%d km/h";
+    private final String SPEED_FORMAT = "%s  %d km/h";
 
     private final int ARGS_WHAT_PLAY_BACK = 123;
     private static final int ARGS_WHAT_SEND_PLAY_BACK = 124;
@@ -72,12 +78,9 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
                                 mCameraView.setBackgroundDrawable(drawable);
                             }
                         }
-                        if (TextUtils.isEmpty(voData.getFileName())) {
-                            setCameraInfo(voData.getFileName());
-                        }
                         if (voData.getGpsData() != null) {
                             GpsInfo gpsInfo = voData.getGpsData();
-                            setCameraSpeed((int) gpsInfo.getSpeedKm());
+                            setCameraSpeed((int) gpsInfo.getSpeedKm(), voData.getFileName());
                             showGpsLocation(gpsInfo.getLat(), gpsInfo.getLog());
                             if (TextUtils.isEmpty(gpsInfo.getAddress())) {
                                 mTxtCameraAddress.setText(gpsInfo.getAddress());
@@ -150,13 +153,15 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
         mCameraView.setCameraId(mCamera.getCameraId());
 
         mTxtCameraInfo = (TextView) findViewById(R.id.camera_info);
-        setCameraInfo(fileName);
+        setCameraInfo();
 
         mTxtCameraAddress = (TextView) findViewById(R.id.camera_address);
         mTxtCameraAddress.setText("Ha Noi");
 
         mTxtCameraSpeed = (TextView) findViewById(R.id.camera_speed);
-        setCameraSpeed(0);
+        Date date = Calendar.getInstance().getTime();
+        java.text.DateFormat df = new SimpleDateFormat("MM/dd/yyyy", Locale.getDefault());
+        setCameraSpeed(0,df.format(date));
 
         mapView = (MapView) findViewById(R.id.map_view);
         if (savedInstanceState == null) {
@@ -189,13 +194,13 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
         });
     }
 
-    private void setCameraSpeed(int speed) {
-        String speedStr = String.format(SPEED_FORMAT, speed);
+    private void setCameraSpeed(int speed, String date) {
+        String speedStr = String.format(Locale.getDefault(),SPEED_FORMAT, date, speed);
         mTxtCameraSpeed.setText(speedStr);
     }
 
-    private void setCameraInfo(String fileName) {
-        String info = String.format(INFO_FORMAT, fileName, mCamera.getCameraName(), mCamera.getCameraId());
+    private void setCameraInfo() {
+        String info = String.format(INFO_FORMAT, mCamera.getCameraGroup(), mCamera.getCameraName());
         mTxtCameraInfo.setText(info);
     }
 

@@ -39,6 +39,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by hungh on 1/13/2017.
@@ -46,7 +47,7 @@ import java.util.Date;
 
 public class CameraLayout extends FrameLayout implements IMessageListener, OnMapReadyCallback {
     public final static String TAG = "Camera_Layout";
-    private final String INFO_FORMAT = "%s %s %s";
+    private final String INFO_FORMAT = "%s %s";
     private final String SPEED_FORMAT = "%d km/h";
 
     private static final int ARGS_WHAT_SEND_LOGIN_REAL_TIME = 121;
@@ -78,7 +79,6 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
                                 } else {
                                     mCameraView.setBackgroundDrawable(drawable);
                                 }
-                                setCameraInfo();
                             }
                             if (realTime.getGpsData() != null) {
                                 GpsInfo gpsInfo = realTime.getGpsData();
@@ -203,15 +203,15 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
     }
 
     private void setCameraSpeed(int speed) {
-        String speedStr = String.format(SPEED_FORMAT, speed);
-        mTxtCameraSpeed.setText(speedStr);
+        String speedStr = String.format(Locale.getDefault(),SPEED_FORMAT, speed);
+        DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss", Locale.getDefault());
+        Calendar calendar = Calendar.getInstance();
+        Date date = calendar.getTime();
+        mTxtCameraSpeed.setText(speedStr + "  " + df.format(date));
     }
 
     private void setCameraInfo() {
-        Calendar calendar = Calendar.getInstance();
-        Date date = calendar.getTime();
-        DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
-        String info = String.format(INFO_FORMAT, df.format(date), mCamera.getCameraName(), mCamera.getCameraId());
+        String info = String.format(INFO_FORMAT, mCamera.getCameraGroup(), mCamera.getCameraName());
         mTxtCameraInfo.setText(info);
     }
 

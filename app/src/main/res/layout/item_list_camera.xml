@@ -36,20 +36,27 @@
                     android:id="@+id/camera_info"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:maxLines="2"
-                    android:textColor="@color/colorAccent" />
-
-                <TextView
-                    android:id="@+id/camera_address"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:maxLines="2"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:textSize="@dimen/text_normal"
                     android:textColor="@color/colorAccent" />
 
                 <TextView
                     android:id="@+id/camera_speed"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:textSize="@dimen/text_normal"
+                    android:textColor="@color/colorAccent" />
+
+                <TextView
+                    android:id="@+id/camera_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:textSize="@dimen/text_normal"
                     android:textColor="@color/colorAccent" />
             </LinearLayout>
 
@@ -64,10 +71,10 @@
                 android:text="GPS" />
         </LinearLayout>
 
-        <com.google.android.gms.maps.MapView
+        <com.hiepkhach9x.appcamera.customview.SquareMapView
             android:id="@+id/map_view"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="wrap_content"
             android:visibility="gone" />
     </LinearLayout>
 </android.support.v7.widget.CardView>

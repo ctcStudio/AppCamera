@@ -230,6 +230,7 @@ public class ListCameraFragment extends BaseFragment implements OnMapReadyCallba
 
     @Override
     public void onClickCamera(String cameraId) {
+        /*
         layoutImage.setVisibility(View.VISIBLE);
         mapFull.setVisibility(View.GONE);
         for (CameraLayout cameraLayout : listCameraLayout) {
@@ -239,6 +240,7 @@ public class ListCameraFragment extends BaseFragment implements OnMapReadyCallba
                 cameraLayout.removeUpdateCameraInfo();
             }
         }
+        */
     }
 
     @Override
