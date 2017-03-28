@@ -2,6 +2,7 @@ package com.hiepkhach9x.appcamera.entities;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import com.hiepkhach9x.appcamera.connection.MessageParser;
 
@@ -10,6 +11,7 @@ import com.hiepkhach9x.appcamera.connection.MessageParser;
  */
 
 public class StoreData implements Parcelable {
+    private String cameraName;
     private String cameraId;
     private String fileName; // yyyy-MM-dd-hh
 
@@ -29,7 +31,18 @@ public class StoreData implements Parcelable {
 
     @Override
     public String toString() {
-        return cameraId + " - " + fileName;
+        if(TextUtils.isEmpty(cameraName)) {
+            return cameraId + " - " + fileName;
+        }
+        return cameraName + " - " + fileName;
+    }
+
+    public String getCameraName() {
+        return cameraName;
+    }
+
+    public void setCameraName(String cameraName) {
+        this.cameraName = cameraName;
     }
 
     public String getCameraId() {
@@ -49,6 +62,7 @@ public class StoreData implements Parcelable {
     }
 
     protected StoreData(Parcel in) {
+        cameraName = in.readString();
         cameraId = in.readString();
         fileName = in.readString();
     }
@@ -72,6 +86,7 @@ public class StoreData implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(cameraName);
         dest.writeString(cameraId);
         dest.writeString(fileName);
     }

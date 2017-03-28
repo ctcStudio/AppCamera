@@ -34,11 +34,6 @@ import com.hiepkhach9x.appcamera.entities.MessageClient;
 import com.hiepkhach9x.appcamera.entities.VOData;
 import com.hiepkhach9x.appcamera.preference.UserPref;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-
 /**
  * Created by hungh on 1/13/2017.
  */
@@ -84,7 +79,7 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
                             GpsInfo gpsInfo = voData.getGpsData();
                             setCameraSpeed((int) gpsInfo.getSpeedKm());
                             showGpsLocation(gpsInfo.getLat(), gpsInfo.getLog());
-                            if(TextUtils.isEmpty(gpsInfo.getAddress())) {
+                            if (TextUtils.isEmpty(gpsInfo.getAddress())) {
                                 mTxtCameraAddress.setText(gpsInfo.getAddress());
                             }
                         }
@@ -298,14 +293,17 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
     }
 
     private void showGpsLocation(double lat, double log) {
-        LatLng cam = new LatLng(lat, log);
-        MarkerOptions markerOptions = new MarkerOptions().position(cam)
-                .title(mCamera.getCameraName());
+        try {
+            LatLng cam = new LatLng(lat, log);
+            MarkerOptions markerOptions = new MarkerOptions().position(cam)
+                    .title(mCamera.getCameraName());
 
-        markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_oto));
-        gMap.addMarker(markerOptions);
-        gMap.setMinZoomPreference(15.0f);
-        gMap.moveCamera(CameraUpdateFactory.newLatLng(cam));
+            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_oto));
+            gMap.addMarker(markerOptions);
+            gMap.setMinZoomPreference(15.0f);
+            gMap.moveCamera(CameraUpdateFactory.newLatLng(cam));
+        } catch (Exception ex) {
+        }
     }
 
     public void removeUpdateVodInfo() {

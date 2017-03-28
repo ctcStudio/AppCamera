@@ -1,1 +1,4 @@
 include ':app'
+include ':datetimepicker'
+
+project(':datetimepicker').projectDir = new File('library/MaterialDateTimePicker')

@@ -64,6 +64,7 @@ public class MessageParser {
                 try {
                     for (int i = 1; i < data.length; i = i + 2) {
                         Camera camera = new Camera();
+                        camera.setCameraGroup(deviceName);
                         camera.setCameraName(data[i]);
                         camera.setCameraId(data[i + 1]);
                         cameras.add(camera);
@@ -164,7 +165,7 @@ public class MessageParser {
         return null;
     }
 
-    public ArrayList<StoreData> parseMessagePlayBack(MessageClient messageClient) {
+    public ArrayList<StoreData> parseMessagePlayBack(MessageClient messageClient, String cameraName) {
         if (messageClient == null || !messageClient.isStoreData()) {
             return null;
         }
@@ -175,6 +176,7 @@ public class MessageParser {
         for (String str : datas) {
             if (str.contains(BACKSLASH)) {
                 StoreData storeData = new StoreData(str);
+                storeData.setCameraName(cameraName);
                 storeDatas.add(storeData);
             }
         }

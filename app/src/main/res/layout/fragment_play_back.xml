@@ -16,8 +16,8 @@
             android:layout_height="wrap_content"
             android:padding="@dimen/space_normal"
             android:layout_weight="2"
-            android:text="From date:"
-            android:textSize="@dimen/text_largest" />
+            android:text="From:"
+            android:textSize="@dimen/text_large" />
 
         <TextView
             android:id="@+id/text_from"
@@ -28,7 +28,7 @@
             android:gravity="center_vertical"
             android:padding="@dimen/space_normal"
             android:text="2017/01/20"
-            android:textSize="@dimen/text_normal" />
+            android:textSize="@dimen/text_large" />
     </LinearLayout>
 
     <LinearLayout
@@ -43,8 +43,8 @@
             android:layout_height="wrap_content"
             android:padding="@dimen/space_normal"
             android:layout_weight="2"
-            android:text="To date:"
-            android:textSize="@dimen/text_largest" />
+            android:text="To:"
+            android:textSize="@dimen/text_large" />
 
         <TextView
             android:id="@+id/text_to"
@@ -55,7 +55,7 @@
             android:gravity="center_vertical"
             android:padding="@dimen/space_normal"
             android:text="2017/01/20"
-            android:textSize="@dimen/text_normal" />
+            android:textSize="@dimen/text_large" />
     </LinearLayout>
 
     <Spinner

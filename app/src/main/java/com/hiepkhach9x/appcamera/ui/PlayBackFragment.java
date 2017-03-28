@@ -1,7 +1,6 @@
 package com.hiepkhach9x.appcamera.ui;
 
 import android.annotation.SuppressLint;
-import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -10,7 +9,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.DatePicker;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -26,12 +24,14 @@ import com.hiepkhach9x.appcamera.entities.Camera;
 import com.hiepkhach9x.appcamera.entities.MessageClient;
 import com.hiepkhach9x.appcamera.entities.StoreData;
 import com.hiepkhach9x.appcamera.preference.UserPref;
+import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by hungnh on 1/20/17.
@@ -41,7 +41,7 @@ enum DateType {
     ToDate
 }
 
-public class PlayBackFragment extends BaseFragment implements View.OnClickListener {
+public class PlayBackFragment extends BaseFragment implements View.OnClickListener, DatePickerDialog.OnDateSetListener {
 
     private static final String KEY_ARG_CAMERA = "key.arg.camera";
     private static final String TAG = "TAG_PLAYBACK";
@@ -84,10 +84,10 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
                         playBackClient.sendGetDataMessage(msg);
                     return true;
                 case ARGS_WHAT_PLAY_BACK:
-                    if(message.obj instanceof MessageClient) {
+                    if (message.obj instanceof MessageClient) {
                         MessageClient messageClient = (MessageClient) message.obj;
                         dismissDialog();
-                        ArrayList<StoreData> datas = messageParser.parseMessagePlayBack(messageClient);
+                        ArrayList<StoreData> datas = messageParser.parseMessagePlayBack(messageClient, currentCamera.getCameraName());
                         storeDataList.clear();
                         storeDataList.addAll(datas);
                         storeAdapter.notifyDataSetChanged();
@@ -110,7 +110,7 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
             mCameras = new ArrayList<>();
         }
 
-        if(storeDataList == null) {
+        if (storeDataList == null) {
             storeDataList = new ArrayList<>();
         }
         messageParser = new MessageParser();
@@ -138,16 +138,16 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
         ArrayAdapter spinnerArrayAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_item, mCameras);
         spinnerCamera.setAdapter(spinnerArrayAdapter);
 
-        storeAdapter = new ArrayAdapter(getContext(),android.R.layout.simple_list_item_1, storeDataList);
+        storeAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_list_item_1, storeDataList);
         listData.setAdapter(storeAdapter);
 
         listData.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 StoreData storeData = storeDataList.get(position);
-                VODFragment vodFragment = VODFragment.newInstance(currentCamera,storeData);
-                if(mNavigateManager!=null) {
-                    mNavigateManager.addPage(vodFragment,MainActivity.TAG_VOD);
+                VODFragment vodFragment = VODFragment.newInstance(currentCamera, storeData);
+                if (mNavigateManager != null) {
+                    mNavigateManager.addPage(vodFragment, MainActivity.TAG_VOD);
                 }
             }
         });
@@ -236,28 +236,16 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
         }
     }
 
-    private void showDateTimeDialog(final DateType type) {
-        final Calendar calendar = Calendar.getInstance();
-        DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(),
-                new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePicker view, int year,
-                                          int monthOfYear, int dayOfMonth) {
-                        Calendar calendar = Calendar.getInstance();
-                        calendar.set(Calendar.YEAR, year);
-                        calendar.set(Calendar.MONTH, monthOfYear);
-                        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                        if (DateType.FromDate == type) {
-                            txtFromDate.setText(year + "-" + (monthOfYear + 1) + "-" + dayOfMonth);
-                            fromDate = calendar.getTime();
-                        } else if (DateType.ToDate == type) {
-                            txtToDate.setText(year + "-" + (monthOfYear + 1) + "-" + dayOfMonth);
-                            toDate = calendar.getTime();
-                        }
+    private DateType selectedType = DateType.FromDate;
 
-                    }
-                }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
-        datePickerDialog.show();
+    private void showDateTimeDialog(DateType type) {
+        selectedType = type;
+        final Calendar calendar = Calendar.getInstance();
+        DatePickerDialog datePickerDialog = DatePickerDialog.newInstance(this,
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH));
+        datePickerDialog.show(getChildFragmentManager(), TAG);
     }
 
     private IMessageListener playBackListener = new IMessageListener() {
@@ -270,12 +258,12 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
         public void handleMessage(MessageClient messageClient) {
             Log.d("HungHN", messageClient.getDataToString());
             if (messageClient.isLoginGetData()) {
-                if(!hasLoginSuccess) {
+                if (!hasLoginSuccess) {
                     hasLoginSuccess = (messageClient.getDataToString().contains("yeucaulai"));
                 }
                 dismissDialog();
             } else if (messageClient.isStoreData()) {
-                if(handler !=null) {
+                if (handler != null) {
                     Message message = new Message();
                     message.what = ARGS_WHAT_PLAY_BACK;
                     message.obj = messageClient;
@@ -284,4 +272,19 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
             }
         }
     };
+
+    @Override
+    public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.YEAR, year);
+        calendar.set(Calendar.MONTH, monthOfYear);
+        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+        if (selectedType == DateType.FromDate) {
+            fromDate = calendar.getTime();
+            txtFromDate.setText(String.format(Locale.ENGLISH, "%02d-%02d-%02d", year, monthOfYear + 1, dayOfMonth));
+        } else if (selectedType == DateType.ToDate) {
+            txtFromDate.setText(String.format(Locale.ENGLISH, "%02d-%02d-%02d", year, monthOfYear + 1, dayOfMonth));
+            toDate = calendar.getTime();
+        }
+    }
 }

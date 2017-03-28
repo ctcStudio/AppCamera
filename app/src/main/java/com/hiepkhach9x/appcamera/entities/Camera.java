@@ -8,6 +8,7 @@ import android.os.Parcelable;
  */
 
 public class Camera implements Parcelable {
+    private String cameraGroup;
     private String cameraName;
     private String cameraId;
     private boolean isOnline;
@@ -15,12 +16,14 @@ public class Camera implements Parcelable {
     public Camera() {
     }
 
-    public Camera(String cameraName, String cameraId) {
+    public Camera(String cameraGroup,String cameraName, String cameraId) {
+        this.cameraGroup = cameraGroup;
         this.cameraName = cameraName;
         this.cameraId = cameraId;
     }
 
     protected Camera(Parcel in) {
+        cameraGroup = in.readString();
         cameraName = in.readString();
         cameraId = in.readString();
         isOnline = in.readByte() != 0;
@@ -37,6 +40,14 @@ public class Camera implements Parcelable {
             return new Camera[size];
         }
     };
+
+    public String getCameraGroup() {
+        return cameraGroup;
+    }
+
+    public void setCameraGroup(String cameraGroup) {
+        this.cameraGroup = cameraGroup;
+    }
 
     public void setCameraName(String cameraName) {
         this.cameraName = cameraName;
@@ -64,7 +75,7 @@ public class Camera implements Parcelable {
 
     @Override
     public String toString() {
-        return cameraName + "(" + cameraId + ")";
+        return cameraGroup + "-" + cameraName;
     }
 
     @Override
@@ -74,6 +85,7 @@ public class Camera implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(cameraGroup);
         dest.writeString(cameraName);
         dest.writeString(cameraId);
         dest.writeByte((byte) (isOnline ? 1 : 0));
