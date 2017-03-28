@@ -41,9 +41,8 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
     public static final String TAG_PLAY_BACK = "TAG-PLAYBACK-FRAGMENT";
     public static final String TAG_VOD = "VOD-FRAGMENT";
 
-    private Button btnLeft, btnRight;
-    private ImageView ivBack;
-    private TextView txtTitle;
+    private TextView btnLeft, btnRight;
+    private ImageView ivBack, ivHome;
     private ArrayList<Camera> cameras;
     private ArrayList<Device> devices;
     private BroadcastReceiver mClientReceiver = new BroadcastReceiver() {
@@ -84,13 +83,14 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
     private void initActionBar() {
         // Inflate your custom layout
         final View actionBarLayout = getLayoutInflater().inflate(R.layout.layout_actionbar, null);
-        btnLeft = (Button) actionBarLayout.findViewById(R.id.button_left);
+        btnLeft = (TextView) actionBarLayout.findViewById(R.id.button_left);
         ivBack = (ImageView) actionBarLayout.findViewById(R.id.imageBack);
-        btnRight = (Button) actionBarLayout.findViewById(R.id.button_right);
-        txtTitle = (TextView) actionBarLayout.findViewById(R.id.text_center);
+        btnRight = (TextView) actionBarLayout.findViewById(R.id.button_right);
+        ivHome = (ImageView) actionBarLayout.findViewById(R.id.icon_home);
         btnLeft.setOnClickListener(actionLeftClickListener);
         btnRight.setOnClickListener(actionRightClickListener);
         ivBack.setOnClickListener(actionLeftClickListener);
+        ivHome.setOnClickListener(actionHomeClickListener);
 
         // Set up your ActionBar
         final ActionBar actionBar = getSupportActionBar();
@@ -162,6 +162,20 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
 
     }
 
+    private View.OnClickListener actionHomeClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Fragment activePage = getActivePage();
+            if (activePage instanceof ListCameraFragment
+                    || activePage instanceof VODFragment
+                    || activePage instanceof PlayBackFragment) {
+                HomeFragment homeFragment = HomeFragment.newInstance(getListDevice());
+                swapPage(homeFragment, TAG_HOME);
+            }
+        }
+    };
+
+
     View.OnClickListener actionLeftClickListener = new View.OnClickListener() {
 
         @Override
@@ -189,15 +203,14 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
             ivBack.setVisibility(View.GONE);
         } else if (activePage instanceof HomeFragment) {
             visibility = View.VISIBLE;
-            text = "PlayBack";
+            text = "Play back";
             ivBack.setVisibility(View.GONE);
         } else if (activePage instanceof ListCameraFragment) {
             visibility = View.GONE;
             ivBack.setVisibility(View.VISIBLE);
         } else if (activePage instanceof PlayBackFragment) {
-            visibility = View.VISIBLE;
-            text = "Online";
-            ivBack.setVisibility(View.GONE);
+            visibility = View.GONE;
+            ivBack.setVisibility(View.VISIBLE);
         } else if (activePage instanceof VODFragment) {
             visibility = View.GONE;
             ivBack.setVisibility(View.VISIBLE);
@@ -236,13 +249,13 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
             visibility = View.VISIBLE;
         } else if (activePage instanceof ListCameraFragment) {
             visibility = View.VISIBLE;
-            text = "PlayBack";
+            text = "Play Back";
         } else if (activePage instanceof PlayBackFragment) {
             visibility = View.GONE;
         } else if (activePage instanceof VODFragment) {
-            visibility = View.VISIBLE;
+            visibility = View.GONE;
         }
-        btnRight.setText(text + " ");
+        btnRight.setText(text);
         btnRight.setVisibility(visibility);
     }
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="?android:attr/actionBarSize"
     android:background="@color/colorPrimary">
 
     <TextView
@@ -18,45 +18,43 @@
         android:textSize="@dimen/text_largest" />
 
     <ImageView
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:id="@+id/icon_home"
+        android:layout_width="?android:attr/actionBarSize"
+        android:layout_height="?android:attr/actionBarSize"
+        android:padding="@dimen/space_smaller"
         android:layout_centerInParent="true"
         android:src="@drawable/ic_oto_logo"
         android:scaleType="fitCenter"/>
 
-    <Button
+    <TextView
         android:id="@+id/button_right"
-        style="@style/default_button"
+        style="@style/default_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="action "
-        android:gravity="right"
-        android:layout_marginRight="@dimen/space_normal"
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
-    <Button
+    <TextView
         android:id="@+id/button_left"
-        style="@style/default_button"
+        style="@style/default_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Play back"
-        android:layout_marginLeft="@dimen/space_normal"
-        android:gravity="left"
-        android:layout_alignBaseline="@+id/button_right"
-        android:layout_alignBottom="@+id/button_right"
+        android:layout_centerVertical="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"/>
 
     <ImageView
-        style="@style/default_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:id="@+id/imageBack"
+        android:layout_width="?android:attr/actionBarSize"
+        android:layout_height="match_parent"
         android:src="@drawable/ic_arrow_back_white_48dp"
-        android:scaleType="fitCenter"
+        android:scaleType="centerInside"
+        android:padding="@dimen/space_small"
+        android:layout_centerVertical="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:id="@+id/imageBack"
         android:visibility="gone"/>
 </RelativeLayout>

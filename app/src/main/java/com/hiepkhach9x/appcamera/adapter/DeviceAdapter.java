@@ -109,7 +109,7 @@ public class DeviceAdapter extends BaseExpandableListAdapter {
         holder.cameraName.setText(camera.getCameraName());
         holder.cameraId.setText(camera.getCameraId());
         holder.status.setImageResource(camera.isOnline() ? R.drawable.dot_online : R.drawable.dot_offline);
-        int bgColor = ContextCompat.getColor(mContext, cameraSelected.contains(camera) ? R.color.colorPrimary
+        int bgColor = ContextCompat.getColor(mContext, cameraSelected.contains(camera) ? R.color.colorPrimaryDark
                 : R.color.colorAccent);
         holder.layoutCamera.setBackgroundColor(bgColor);
         holder.layoutCamera.setOnClickListener(new View.OnClickListener() {
