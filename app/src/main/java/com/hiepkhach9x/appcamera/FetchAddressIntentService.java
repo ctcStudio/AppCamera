@@ -23,12 +23,15 @@ public class FetchAddressIntentService extends IntentService {
     private static final String TAG = "FetchAddressService";
 
     protected ResultReceiver mReceiver;
+    private String cameraId;
 
     public static void startIntentService(Context context,
-                                          ResultReceiver  mResultReceiver,
-                                          Location mLastLocation) {
+                                          String cameraId,
+                                          Location mLastLocation,
+                                          ResultReceiver  mResultReceiver) {
         Intent intent = new Intent(context, FetchAddressIntentService.class);
         intent.putExtra(Constants.RECEIVER, mResultReceiver);
+        intent.putExtra(Constants.RESULT_CAMERA_KEY, cameraId);
         intent.putExtra(Constants.LOCATION_DATA_EXTRA, mLastLocation);
         context.startService(intent);
     }
@@ -47,6 +50,7 @@ public class FetchAddressIntentService extends IntentService {
                 Constants.LOCATION_DATA_EXTRA);
         mReceiver = intent.getParcelableExtra(
                 Constants.RESULT_DATA_KEY);
+        cameraId = intent.getStringExtra(Constants.RESULT_CAMERA_KEY);
 
         List<Address> addresses = null;
 
@@ -95,6 +99,7 @@ public class FetchAddressIntentService extends IntentService {
     private void deliverResultToReceiver(int resultCode, String message) {
         Bundle bundle = new Bundle();
         bundle.putString(Constants.RESULT_DATA_KEY, message);
+        bundle.putString(Constants.RESULT_CAMERA_KEY, cameraId);
         mReceiver.send(resultCode, bundle);
     }
 }

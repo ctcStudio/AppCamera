@@ -1,0 +1,3 @@
+Keystore:
+monitoring.jks
+pass: hiepkhach9x

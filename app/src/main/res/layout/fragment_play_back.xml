@@ -14,8 +14,8 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/space_normal"
             android:layout_weight="2"
+            android:padding="@dimen/space_normal"
             android:text="From:"
             android:textSize="@dimen/text_large" />
 
@@ -41,8 +41,8 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/space_normal"
             android:layout_weight="2"
+            android:padding="@dimen/space_normal"
             android:text="To:"
             android:textSize="@dimen/text_large" />
 
@@ -62,7 +62,31 @@
         android:id="@+id/spinner_camera"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/space_small" />
+        android:layout_margin="@dimen/space_small"
+        android:textSize="@dimen/text_large" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/space_small"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/space_small"
+            android:gravity="center"
+            android:text="Speed" />
+
+        <Spinner
+            android:id="@+id/spinner_speed"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/space_small"
+            android:gravity="center_vertical"
+            android:textSize="@dimen/text_large" />
+    </LinearLayout>
 
     <Button
         android:id="@+id/get_data"

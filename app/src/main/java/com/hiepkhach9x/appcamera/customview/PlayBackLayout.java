@@ -7,7 +7,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
-import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -46,7 +45,7 @@ import java.util.Locale;
 
 public class PlayBackLayout extends FrameLayout implements IMessageListener, OnMapReadyCallback {
     public final static String TAG = "Camera_Layout";
-    private final String INFO_FORMAT = "%s %s %s";
+    private final String INFO_FORMAT = "%s %s";
     private final String SPEED_FORMAT = "%s  %d km/h";
 
     private final int ARGS_WHAT_PLAY_BACK = 123;
@@ -54,7 +53,8 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
     private static final int ARGS_WHAT_ERROR_LOGIN = 125;
 
     private final short TIME_PLAY = 1000; // from 0 - 3600s độ dài 2 bytes dạng unsigned integer 16
-    private final char PLAY_SPEED = '5'; // from x1-x9 độ dài 1 bytes dạng unsigned integer 8
+    private int mPlaySpeed = 1; // from x1-x9 độ dài 1 bytes dạng unsigned integer 8
+    private final char[] PLAY_SPEED_ARR = new char[] {'1','2','3','4','5','6','7','8','9'};
 
     private Client mClient;
     private PlayBackThread playBackThread;
@@ -97,7 +97,7 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
                             && mCamera != null
                             && !TextUtils.isEmpty(mCamera.getCameraId())
                             && isConnectSuccess) {
-                        byte[] msg = parser.genMessageVODData(mCamera.getCameraId(), fileName, TIME_PLAY, PLAY_SPEED);
+                        byte[] msg = parser.genMessageVODData(mCamera.getCameraId(), fileName, TIME_PLAY, PLAY_SPEED_ARR[mPlaySpeed]);
                         mClient.sendGetVODDataMessage(msg);
                     }
                     return true;
@@ -119,8 +119,9 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
     private GoogleMap gMap;
     private Bundle savedInstanceState = null;
 
-    public PlayBackLayout(Context context, Camera camera, String fileName, Bundle bundle) {
+    public PlayBackLayout(Context context, Camera camera, String fileName,int playSpeed, Bundle bundle) {
         super(context);
+        this.mPlaySpeed = playSpeed;
         this.mCamera = camera;
         savedInstanceState = bundle;
         this.fileName = fileName;

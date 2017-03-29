@@ -39,14 +39,17 @@ public class VODFragment extends BaseFragment implements OnMapReadyCallback, Cli
 
     private static final String ARGS_STORE_DATA = "args.store.data";
     private static final String ARGS_CAMERA = "args.camera";
+    private static final String ARGS_PLAY_SPEED = "args.play.speed";
     private StoreData mStoreData;
     private Camera mCamera;
+    private int playSpeed;
 
-    public static VODFragment newInstance(Camera camera, StoreData storeData) {
+    public static VODFragment newInstance(Camera camera, StoreData storeData, int playSpeed) {
 
         Bundle args = new Bundle();
         args.putParcelable(ARGS_STORE_DATA, storeData);
         args.putParcelable(ARGS_CAMERA,camera);
+        args.putInt(ARGS_PLAY_SPEED,playSpeed);
         VODFragment fragment = new VODFragment();
         fragment.setArguments(args);
         return fragment;
@@ -65,9 +68,11 @@ public class VODFragment extends BaseFragment implements OnMapReadyCallback, Cli
         if (savedInstanceState != null) {
             mStoreData = savedInstanceState.getParcelable(ARGS_STORE_DATA);
             mCamera = savedInstanceState.getParcelable(ARGS_CAMERA);
+            playSpeed = savedInstanceState.getInt(ARGS_PLAY_SPEED);
         } else if (getArguments() != null) {
             mStoreData = getArguments().getParcelable(ARGS_STORE_DATA);
             mCamera = getArguments().getParcelable(ARGS_CAMERA);
+            playSpeed = getArguments().getInt(ARGS_PLAY_SPEED);
         }
 
         MapsInitializer.initialize(getContext());
@@ -78,13 +83,14 @@ public class VODFragment extends BaseFragment implements OnMapReadyCallback, Cli
         super.onSaveInstanceState(outState);
         outState.putParcelable(ARGS_STORE_DATA, mStoreData);
         outState.putParcelable(ARGS_CAMERA,mCamera);
+        outState.putInt(ARGS_PLAY_SPEED,playSpeed);
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         layoutVod = (LinearLayout) view.findViewById(R.id.layout_vod);
-        playBackLayout = new PlayBackLayout(getContext(), mCamera, mStoreData.getFileName(), savedInstanceState);
+        playBackLayout = new PlayBackLayout(getContext(), mCamera, mStoreData.getFileName(),playSpeed, savedInstanceState);
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         playBackLayout.setLayoutParams(layoutParams);
         playBackLayout.initClient();

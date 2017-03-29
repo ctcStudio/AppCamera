@@ -57,13 +57,14 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
     }
 
     private ArrayList<Camera> mCameras;
-    private Spinner spinnerCamera;
+    private Spinner spinnerCamera, spinnerSpeed;
     private TextView txtFromDate, txtToDate;
     private ListView listData;
     private Date fromDate, toDate;
     private ArrayList<StoreData> storeDataList;
     private ArrayAdapter storeAdapter;
     private Camera currentCamera;
+    private String[] arrSpeeds = new String[]{"x1","x2","x3","x4","x5","x6","x7","x8","x9"};
 
     private boolean hasLoginSuccess;
     private Client playBackClient;
@@ -124,6 +125,7 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
         txtFromDate = (TextView) view.findViewById(R.id.text_from);
         txtToDate = (TextView) view.findViewById(R.id.text_to);
         spinnerCamera = (Spinner) view.findViewById(R.id.spinner_camera);
+        spinnerSpeed = (Spinner) view.findViewById(R.id.spinner_speed);
         listData = (ListView) view.findViewById(R.id.list_data);
 
         Calendar calendar = Calendar.getInstance();
@@ -135,6 +137,10 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
         view.findViewById(R.id.to_date).setOnClickListener(this);
         view.findViewById(R.id.get_data).setOnClickListener(this);
 
+        ArrayAdapter spinnerSpeedAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_item, arrSpeeds);
+        spinnerSpeed.setAdapter(spinnerSpeedAdapter);
+
+
         ArrayAdapter spinnerArrayAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_item, mCameras);
         spinnerCamera.setAdapter(spinnerArrayAdapter);
 
@@ -145,7 +151,8 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 StoreData storeData = storeDataList.get(position);
-                VODFragment vodFragment = VODFragment.newInstance(currentCamera, storeData);
+                int playSpeed = spinnerSpeed.getSelectedItemPosition();
+                VODFragment vodFragment = VODFragment.newInstance(currentCamera, storeData, playSpeed);
                 if (mNavigateManager != null) {
                     mNavigateManager.addPage(vodFragment, MainActivity.TAG_VOD);
                 }
@@ -245,6 +252,7 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH));
+        datePickerDialog.setVersion(DatePickerDialog.Version.VERSION_1);
         datePickerDialog.show(getChildFragmentManager(), TAG);
     }
 

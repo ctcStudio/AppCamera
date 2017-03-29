@@ -14,8 +14,11 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -82,6 +85,8 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
 
     private void initActionBar() {
         // Inflate your custom layout
+        ActionBar.LayoutParams lp = new ActionBar.LayoutParams(ActionBar.LayoutParams.MATCH_PARENT, ActionBar.LayoutParams.WRAP_CONTENT, Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+
         final View actionBarLayout = getLayoutInflater().inflate(R.layout.layout_actionbar, null);
         btnLeft = (TextView) actionBarLayout.findViewById(R.id.button_left);
         ivBack = (ImageView) actionBarLayout.findViewById(R.id.imageBack);
@@ -98,7 +103,11 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
             actionBar.setDisplayShowHomeEnabled(false);
             actionBar.setDisplayShowTitleEnabled(false);
             actionBar.setDisplayShowCustomEnabled(true);
-            actionBar.setCustomView(actionBarLayout);
+            actionBar.setCustomView(actionBarLayout,lp);
+
+            Toolbar parent = (Toolbar) actionBarLayout.getParent();
+            if (parent != null)
+                parent.setContentInsetsAbsolute(0, 0);
         }
     }
 
