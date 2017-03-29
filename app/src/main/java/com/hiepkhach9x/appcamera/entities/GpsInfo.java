@@ -197,22 +197,6 @@ public class GpsInfo implements Parcelable {
         return degrees + minutes / 60;
     }
 
-    public String getAddressFromGps() {
-        try {
-            Geocoder geocoder;
-            List<Address> addresses;
-            geocoder = new Geocoder(MyApplication.get(), Locale.getDefault());
-            addresses = geocoder.getFromLocation(getLat(), getLog(), 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
-            String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-            return address;
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } catch (Exception e) {
-
-        }
-        return "";
-    }
-
     @Override
     public int describeContents() {
         return 0;

@@ -3,9 +3,11 @@ package com.hiepkhach9x.appcamera.customview;
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.os.ResultReceiver;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -24,6 +26,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.hiepkhach9x.appcamera.Config;
+import com.hiepkhach9x.appcamera.Constants;
+import com.hiepkhach9x.appcamera.FetchAddressIntentService;
 import com.hiepkhach9x.appcamera.MyApplication;
 import com.hiepkhach9x.appcamera.R;
 import com.hiepkhach9x.appcamera.connection.Client;
@@ -292,10 +296,21 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
         } else if (messageClient.isRealTime()) {
             android.os.Message realTimeMsg = new android.os.Message();
             realTimeMsg.what = ARGS_WHAT_REAL_TIME;
-            realTimeMsg.obj = parser.parseRealTimeMessage(messageClient);
+            RealTime realTime = parser.parseRealTimeMessage(messageClient);
+            realTimeMsg.obj = realTime;
+            getAddress(realTime.getGpsData());
             if (mHandler != null) {
                 mHandler.sendMessage(realTimeMsg);
             }
+        }
+    }
+
+    private  long lastGetRealTime = 0;
+    private void getAddress(GpsInfo gps){
+        if(System.currentTimeMillis() - lastGetRealTime > (60 * 1000)) {
+            FetchAddressIntentService.startIntentService(getContext(),
+            mCamera.getCameraId(),gps.getLat(),gps.getLog(),new AddressResultReceiver());
+            lastGetRealTime = System.currentTimeMillis();
         }
     }
 
@@ -401,5 +416,38 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
 
     public interface UpdateCameraInfo {
         void onUpdateInfo(RealTime realTime);
+    }
+
+    private final Handler noneHandle = new Handler();
+
+    private class AddressResultReceiver extends ResultReceiver {
+
+        /**
+         * Create a new ResultReceive to receive results.  Your
+         * {@link #onReceiveResult} method will be called from the thread running
+         * <var>handler</var> if given, or from an arbitrary thread if null.
+         */
+
+        public AddressResultReceiver() {
+            super(noneHandle);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+
+            // Show a toast message if an address was found.
+            if (resultCode == Constants.SUCCESS_RESULT) {
+                String mAddressOutput = resultData.getString(Constants.RESULT_DATA_KEY);
+                String cameraId = resultData.getString(Constants.RESULT_CAMERA_KEY);
+                displayAddress(cameraId,mAddressOutput);
+            }
+
+        }
+
+        private void displayAddress(String cameraId, String addressOutput) {
+            if(mCamera.getCameraId().equals(cameraId)) {
+                mTxtCameraAddress.setText(addressOutput);
+            }
+        }
     }
 }

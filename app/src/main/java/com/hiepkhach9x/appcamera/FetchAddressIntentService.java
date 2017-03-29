@@ -27,12 +27,14 @@ public class FetchAddressIntentService extends IntentService {
 
     public static void startIntentService(Context context,
                                           String cameraId,
-                                          Location mLastLocation,
+                                          double lat,
+                                          double log,
                                           ResultReceiver  mResultReceiver) {
         Intent intent = new Intent(context, FetchAddressIntentService.class);
         intent.putExtra(Constants.RECEIVER, mResultReceiver);
         intent.putExtra(Constants.RESULT_CAMERA_KEY, cameraId);
-        intent.putExtra(Constants.LOCATION_DATA_EXTRA, mLastLocation);
+        intent.putExtra(Constants.LOCATION_DATA_EXTRA_LAT, lat);
+        intent.putExtra(Constants.LOCATION_DATA_EXTRA_LOG, log);
         context.startService(intent);
     }
 
@@ -46,18 +48,19 @@ public class FetchAddressIntentService extends IntentService {
         String errorMessage = "";
 
         // Get the location passed to this service through an extra.
-        Location location = intent.getParcelableExtra(
-                Constants.LOCATION_DATA_EXTRA);
-        mReceiver = intent.getParcelableExtra(
-                Constants.RESULT_DATA_KEY);
+        double lat = intent.getParcelableExtra(
+                Constants.LOCATION_DATA_EXTRA_LAT);
+        double log = intent.getParcelableExtra(
+                Constants.LOCATION_DATA_EXTRA_LOG);
+        mReceiver = intent.getParcelableExtra(Constants.RECEIVER);
         cameraId = intent.getStringExtra(Constants.RESULT_CAMERA_KEY);
 
         List<Address> addresses = null;
 
         try {
             addresses = geocoder.getFromLocation(
-                    location.getLatitude(),
-                    location.getLongitude(),
+                    lat,
+                    log,
                     // In this sample, get just a single address.
                     1);
         } catch (IOException ioException) {
@@ -68,9 +71,9 @@ public class FetchAddressIntentService extends IntentService {
             // Catch invalid latitude or longitude values.
             errorMessage = "invalid_lat_long_used";
             Log.e(TAG, errorMessage + ". " +
-                    "Latitude = " + location.getLatitude() +
+                    "Latitude = " + lat +
                     ", Longitude = " +
-                    location.getLongitude(), illegalArgumentException);
+                    log, illegalArgumentException);
         }
 
         // Handle case where no address was found.

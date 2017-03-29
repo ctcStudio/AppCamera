@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.os.ResultReceiver;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -23,6 +24,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.hiepkhach9x.appcamera.Config;
+import com.hiepkhach9x.appcamera.Constants;
+import com.hiepkhach9x.appcamera.FetchAddressIntentService;
 import com.hiepkhach9x.appcamera.MyApplication;
 import com.hiepkhach9x.appcamera.R;
 import com.hiepkhach9x.appcamera.connection.Client;
@@ -276,10 +279,21 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
         } else if (messageClient.isVOData()) {
             android.os.Message message = new android.os.Message();
             message.what = ARGS_WHAT_PLAY_BACK;
-            message.obj = parser.parseVODMessage(messageClient);
+            VOData voData= parser.parseVODMessage(messageClient);
+            message.obj = voData;
+            getAddress(voData.getGpsData());
             if (mHandler != null) {
                 mHandler.sendMessage(message);
             }
+        }
+    }
+
+    private  long lastGetRealTime = 0;
+    private void getAddress(GpsInfo gps){
+        if(System.currentTimeMillis() - lastGetRealTime > (60 * 1000)) {
+            FetchAddressIntentService.startIntentService(getContext(),
+                    mCamera.getCameraId(),gps.getLat(),gps.getLog(),new AddressResultReceiver());
+            lastGetRealTime = System.currentTimeMillis();
         }
     }
 
@@ -382,5 +396,38 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
 
     public interface UpdateVodInfo {
         void onUpdateInfo(VOData realTime);
+    }
+
+    private final Handler noneHandle = new Handler();
+
+    private class AddressResultReceiver extends ResultReceiver {
+
+        /**
+         * Create a new ResultReceive to receive results.  Your
+         * {@link #onReceiveResult} method will be called from the thread running
+         * <var>handler</var> if given, or from an arbitrary thread if null.
+         */
+
+        public AddressResultReceiver() {
+            super(noneHandle);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+
+            // Show a toast message if an address was found.
+            if (resultCode == Constants.SUCCESS_RESULT) {
+                String mAddressOutput = resultData.getString(Constants.RESULT_DATA_KEY);
+                String cameraId = resultData.getString(Constants.RESULT_CAMERA_KEY);
+                displayAddress(cameraId,mAddressOutput);
+            }
+
+        }
+
+        private void displayAddress(String cameraId, String addressOutput) {
+            if(mCamera.getCameraId().equals(cameraId)) {
+                mTxtCameraAddress.setText(addressOutput);
+            }
+        }
     }
 }

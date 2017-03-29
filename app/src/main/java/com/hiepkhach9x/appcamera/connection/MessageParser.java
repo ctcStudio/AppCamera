@@ -100,7 +100,6 @@ public class MessageParser {
         return null;
     }
 
-    private long lastGetRealTime = 0;
     public RealTime parseRealTimeMessage(MessageClient messageClient) {
         if (!messageClient.isRealTime()) {
             return null;
@@ -136,11 +135,6 @@ public class MessageParser {
                 gpsInfo = new GpsInfo();
             } else {
                 gpsInfo = new GpsInfo(gps);
-                if(System.currentTimeMillis() - lastGetRealTime > (60 * 1000)) {
-                    String address = gpsInfo.getAddressFromGps();
-                    gpsInfo.setAddress(address);
-                    lastGetRealTime = System.currentTimeMillis();
-                }
             }
             byte[] pic = Arrays.copyOfRange(bytes, beginPic, endPic + 1); // picture from 0xFF8 to 0xFF9
             final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -184,7 +178,6 @@ public class MessageParser {
     }
 
 
-    private long lastGetTime = 0;
     public VOData parseVODMessage(MessageClient messageClient) {
         //TODO Có hiện tượng chồng chéo bytes dữ liệu
         if (!messageClient.isVOData()) {
@@ -219,11 +212,6 @@ public class MessageParser {
             GpsInfo gpsInfo = null;
             if (!TextUtils.isEmpty(gps)) {
                 gpsInfo = new GpsInfo(gps);
-                if(System.currentTimeMillis() - lastGetTime > 10000) {
-                    String address = gpsInfo.getAddressFromGps();
-                    gpsInfo.setAddress(address);
-                    lastGetTime = System.currentTimeMillis();
-                }
             }
             byte[] pic = Arrays.copyOfRange(bytes, beginPic, endPic + 1); // picture from 0xFF8 to 0xFF9
             final BitmapFactory.Options options = new BitmapFactory.Options();
