@@ -48,10 +48,10 @@ public class FetchAddressIntentService extends IntentService {
         String errorMessage = "";
 
         // Get the location passed to this service through an extra.
-        double lat = intent.getParcelableExtra(
-                Constants.LOCATION_DATA_EXTRA_LAT);
-        double log = intent.getParcelableExtra(
-                Constants.LOCATION_DATA_EXTRA_LOG);
+        double lat = intent.getDoubleExtra(
+                Constants.LOCATION_DATA_EXTRA_LAT,0);
+        double log = intent.getDoubleExtra(
+                Constants.LOCATION_DATA_EXTRA_LOG,0);
         mReceiver = intent.getParcelableExtra(Constants.RECEIVER);
         cameraId = intent.getStringExtra(Constants.RESULT_CAMERA_KEY);
 

@@ -24,7 +24,7 @@ public class SquareMapView extends MapView {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        super.onMeasure(widthMeasureSpec, widthMeasureSpec);
         int width = getMeasuredWidth();
         setMeasuredDimension(width, width);
     }

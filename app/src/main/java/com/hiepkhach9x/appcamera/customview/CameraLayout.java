@@ -7,6 +7,7 @@ import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.os.ResultReceiver;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -88,7 +89,7 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
                                 GpsInfo gpsInfo = realTime.getGpsData();
                                 setCameraSpeed((int) gpsInfo.getSpeedKm());
                                 showGpsLocation(gpsInfo.getLat(), gpsInfo.getLog());
-                                if(TextUtils.isEmpty(gpsInfo.getAddress())) {
+                                if (!TextUtils.isEmpty(gpsInfo.getAddress())) {
                                     mTxtCameraAddress.setText(gpsInfo.getAddress());
                                 }
                             }
@@ -207,7 +208,7 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
     }
 
     private void setCameraSpeed(int speed) {
-        String speedStr = String.format(Locale.getDefault(),SPEED_FORMAT, speed);
+        String speedStr = String.format(Locale.getDefault(), SPEED_FORMAT, speed);
         DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss", Locale.getDefault());
         Calendar calendar = Calendar.getInstance();
         Date date = calendar.getTime();
@@ -222,8 +223,6 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        if (mCamera != null)
-            mTxtCameraAddress.setText(mCamera.getCameraId());
     }
 
     public void setCamera(Camera camera) {
@@ -231,8 +230,6 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
         if (mCameraView != null) {
             mCameraView.initClient();
         }
-        if (mCamera != null)
-            mTxtCameraAddress.setText(camera.getCameraId());
     }
 
     @Override
@@ -298,19 +295,26 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
             realTimeMsg.what = ARGS_WHAT_REAL_TIME;
             RealTime realTime = parser.parseRealTimeMessage(messageClient);
             realTimeMsg.obj = realTime;
-            getAddress(realTime.getGpsData());
+            if (realTime != null) {
+                getAddress(realTime.getGpsData());
+            }
             if (mHandler != null) {
                 mHandler.sendMessage(realTimeMsg);
             }
         }
     }
 
-    private  long lastGetRealTime = 0;
-    private void getAddress(GpsInfo gps){
-        if(System.currentTimeMillis() - lastGetRealTime > (60 * 1000)) {
-            FetchAddressIntentService.startIntentService(getContext(),
-            mCamera.getCameraId(),gps.getLat(),gps.getLog(),new AddressResultReceiver());
-            lastGetRealTime = System.currentTimeMillis();
+    private long lastGetRealTime = 0;
+    private boolean loadSuccess = true;
+
+    private void getAddress(GpsInfo gps) {
+        if (System.currentTimeMillis() - lastGetRealTime > (30 * 1000) && loadSuccess) {
+            if (gps != null) {
+                FetchAddressIntentService.startIntentService(getContext(),
+                        mCamera.getCameraId(), gps.getLat(), gps.getLog(), new AddressResultReceiver());
+                lastGetRealTime = System.currentTimeMillis();
+                loadSuccess = false;
+            }
         }
     }
 
@@ -437,17 +441,24 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
 
             // Show a toast message if an address was found.
             if (resultCode == Constants.SUCCESS_RESULT) {
-                String mAddressOutput = resultData.getString(Constants.RESULT_DATA_KEY);
-                String cameraId = resultData.getString(Constants.RESULT_CAMERA_KEY);
-                displayAddress(cameraId,mAddressOutput);
+                final String mAddressOutput = resultData.getString(Constants.RESULT_DATA_KEY);
+                final String cameraId = resultData.getString(Constants.RESULT_CAMERA_KEY);
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        displayAddress(cameraId, mAddressOutput);
+                    }
+                });
             }
 
         }
 
         private void displayAddress(String cameraId, String addressOutput) {
-            if(mCamera.getCameraId().equals(cameraId)) {
-                mTxtCameraAddress.setText(addressOutput);
+            if (mCamera.getCameraId().equals(cameraId)) {
+                if (!TextUtils.isEmpty(addressOutput))
+                    mTxtCameraAddress.setText(addressOutput);
             }
+            loadSuccess = true;
         }
     }
 }

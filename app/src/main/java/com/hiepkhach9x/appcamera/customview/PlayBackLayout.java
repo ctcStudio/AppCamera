@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.os.ResultReceiver;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -85,7 +86,7 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
                             GpsInfo gpsInfo = voData.getGpsData();
                             setCameraSpeed((int) gpsInfo.getSpeedKm(), voData.getFileName());
                             showGpsLocation(gpsInfo.getLat(), gpsInfo.getLog());
-                            if (TextUtils.isEmpty(gpsInfo.getAddress())) {
+                            if (!TextUtils.isEmpty(gpsInfo.getAddress())) {
                                 mTxtCameraAddress.setText(gpsInfo.getAddress());
                             }
                         }
@@ -211,8 +212,6 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        if (mCamera != null)
-            mTxtCameraAddress.setText(mCamera.getCameraId());
     }
 
     public void setCamera(Camera camera) {
@@ -220,8 +219,6 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
         if (mCameraView != null) {
             mCameraView.initClient();
         }
-        if (mCamera != null)
-            mTxtCameraAddress.setText(camera.getCameraId());
     }
 
     @Override
@@ -281,7 +278,9 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
             message.what = ARGS_WHAT_PLAY_BACK;
             VOData voData= parser.parseVODMessage(messageClient);
             message.obj = voData;
-            getAddress(voData.getGpsData());
+            if(voData !=null) {
+                getAddress(voData.getGpsData());
+            }
             if (mHandler != null) {
                 mHandler.sendMessage(message);
             }
@@ -289,11 +288,14 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
     }
 
     private  long lastGetRealTime = 0;
+    private boolean loadSuccess = true;
     private void getAddress(GpsInfo gps){
-        if(System.currentTimeMillis() - lastGetRealTime > (60 * 1000)) {
+        if(System.currentTimeMillis() - lastGetRealTime > (30 * 1000)
+                && loadSuccess) {
             FetchAddressIntentService.startIntentService(getContext(),
                     mCamera.getCameraId(),gps.getLat(),gps.getLog(),new AddressResultReceiver());
             lastGetRealTime = System.currentTimeMillis();
+            loadSuccess = false;
         }
     }
 
@@ -417,17 +419,24 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
 
             // Show a toast message if an address was found.
             if (resultCode == Constants.SUCCESS_RESULT) {
-                String mAddressOutput = resultData.getString(Constants.RESULT_DATA_KEY);
-                String cameraId = resultData.getString(Constants.RESULT_CAMERA_KEY);
-                displayAddress(cameraId,mAddressOutput);
+                final String mAddressOutput = resultData.getString(Constants.RESULT_DATA_KEY);
+                final String cameraId = resultData.getString(Constants.RESULT_CAMERA_KEY);
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        displayAddress(cameraId,mAddressOutput);
+                    }
+                });
             }
 
         }
 
         private void displayAddress(String cameraId, String addressOutput) {
             if(mCamera.getCameraId().equals(cameraId)) {
-                mTxtCameraAddress.setText(addressOutput);
+                if (!TextUtils.isEmpty(addressOutput))
+                    mTxtCameraAddress.setText(addressOutput);
             }
+            loadSuccess = true;
         }
     }
 }
