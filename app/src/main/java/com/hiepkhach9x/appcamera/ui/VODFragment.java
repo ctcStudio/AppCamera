@@ -230,6 +230,10 @@ public class VODFragment extends BaseFragment implements OnMapReadyCallback, Cli
         playBackLayout.setUpdateVodInfo(this);
     }
 
+    @Override
+    public void onShowMap(String cameraId) {
+    }
+
     public boolean goBack() {
         if(layoutImage.getVisibility() == View.VISIBLE
                 || mapFull.getVisibility() == View.VISIBLE) {

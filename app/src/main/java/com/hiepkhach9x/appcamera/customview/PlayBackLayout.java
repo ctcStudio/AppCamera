@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -67,6 +68,7 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
     private UpdateVodInfo updateVodInfo;
     private boolean isConnectSuccess;
     private VOData lastVodData;
+    private short lastTime = -1;
     private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(android.os.Message message) {
@@ -93,6 +95,11 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
                         lastVodData = voData;
                         if (updateVodInfo != null) {
                             updateVodInfo.onUpdateInfo(voData);
+                        }
+                        short time = voData.getTime();
+                        if(progressBar!=null && time >=lastTime ) {
+                            progressBar.setProgress(time);
+                            lastTime = time;
                         }
                     }
                     return true;
@@ -121,6 +128,7 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
     private String fileName;
     private MapView mapView;
     private GoogleMap gMap;
+    private ProgressBar progressBar;
     private Bundle savedInstanceState = null;
 
     public PlayBackLayout(Context context, Camera camera, String fileName,int playSpeed, Bundle bundle) {
@@ -157,6 +165,10 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
         mCameraView = (CameraView) findViewById(R.id.camera);
         mCameraView.setCameraId(mCamera.getCameraId());
 
+        progressBar = (ProgressBar) findViewById(R.id.progress);
+        progressBar.setVisibility(VISIBLE);
+        progressBar.setMax(3600);
+
         mTxtCameraInfo = (TextView) findViewById(R.id.camera_info);
         setCameraInfo();
 
@@ -180,11 +192,9 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
             @Override
             public void onClick(View v) {
                 if (mapView.getVisibility() == VISIBLE) {
-                    mGps.setText("Show Gps");
                     mapView.setVisibility(GONE);
                 } else {
                     mapView.setVisibility(VISIBLE);
-                    mGps.setText("hide Gps");
                 }
             }
         });

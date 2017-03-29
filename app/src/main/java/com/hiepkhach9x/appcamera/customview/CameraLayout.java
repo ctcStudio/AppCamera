@@ -189,11 +189,11 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
         mGps.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mapView.getVisibility() == VISIBLE) {
-                    mapView.setVisibility(GONE);
-                } else {
-                    mapView.setVisibility(VISIBLE);
-                }
+               if(cameraListener !=null) {
+                   cameraListener.onShowMap(mCamera.getCameraId());
+               } else {
+                   switchMap();
+               }
             }
         });
 
@@ -344,6 +344,18 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
         gMap.addMarker(markerOptions);
         gMap.setMinZoomPreference(15.0f);
         gMap.moveCamera(CameraUpdateFactory.newLatLng(cam));
+    }
+
+    public void switchMap() {
+        if (mapView.getVisibility() == VISIBLE) {
+            mapView.setVisibility(GONE);
+        } else {
+            mapView.setVisibility(VISIBLE);
+        }
+    }
+
+    public void hideMap() {
+        mapView.setVisibility(GONE);
     }
 
     class RealTimeThread extends Thread {

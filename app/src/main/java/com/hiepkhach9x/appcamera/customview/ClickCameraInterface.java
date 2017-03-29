@@ -8,4 +8,6 @@ public interface ClickCameraInterface {
     void onClickCamera(String cameraId);
 
     void onClickMap(String cameraId);
+
+    void onShowMap(String cameraId);
 }

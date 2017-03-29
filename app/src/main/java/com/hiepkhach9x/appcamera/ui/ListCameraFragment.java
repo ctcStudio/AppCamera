@@ -257,6 +257,17 @@ public class ListCameraFragment extends BaseFragment implements OnMapReadyCallba
         }
     }
 
+    @Override
+    public void onShowMap(String cameraId) {
+        for (CameraLayout cameraLayout : listCameraLayout) {
+            if (cameraLayout.hasCamera(cameraId)) {
+                cameraLayout.switchMap();
+            } else {
+                cameraLayout.hideMap();
+            }
+        }
+    }
+
     public boolean goBack() {
         if (layoutImage.getVisibility() == View.VISIBLE
                 || mapFull.getVisibility() == View.VISIBLE) {

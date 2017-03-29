@@ -92,9 +92,9 @@ public class FetchAddressIntentService extends IntentService {
             for(int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
                 addressFragments.add(address.getAddressLine(i));
             }
-            Log.d(TAG, "address_found");
+            Log.d(TAG, "address_found: " + addressFragments);
             deliverResultToReceiver(Constants.SUCCESS_RESULT,
-                    TextUtils.join(System.getProperty("line.separator"),
+                    TextUtils.join(", ",
                             addressFragments));
         }
     }
