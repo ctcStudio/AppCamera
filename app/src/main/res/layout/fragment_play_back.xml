@@ -8,13 +8,13 @@
         android:id="@+id/from_date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/space_small"
+        android:layout_margin="@dimen/space_smaller"
         android:orientation="horizontal">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
+            android:layout_weight="3"
             android:padding="@dimen/space_normal"
             android:text="From:"
             android:textSize="@dimen/text_large" />
@@ -24,10 +24,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:drawableRight="@drawable/ic_arrow_right"
-            android:gravity="center_vertical"
-            android:padding="@dimen/space_normal"
-            android:text="2017/01/20"
+            android:drawableRight="@drawable/arrow_drop_down_black"
+            android:gravity="center_vertical|right"
+            android:background="@drawable/shape_border"
+            android:padding="@dimen/space_smaller"
+            android:text="3017/01/20"
             android:textSize="@dimen/text_large" />
     </LinearLayout>
 
@@ -35,13 +36,13 @@
         android:id="@+id/to_date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/space_small"
+        android:layout_margin="@dimen/space_smaller"
         android:orientation="horizontal">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="2"
+            android:layout_weight="3"
             android:padding="@dimen/space_normal"
             android:text="To:"
             android:textSize="@dimen/text_large" />
@@ -51,41 +52,70 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:drawableRight="@drawable/ic_arrow_right"
-            android:gravity="center_vertical"
-            android:padding="@dimen/space_normal"
+            android:drawableRight="@drawable/arrow_drop_down_black"
+            android:gravity="center_vertical|right"
+            android:padding="@dimen/space_smaller"
             android:text="2017/01/20"
+            android:background="@drawable/shape_border"
             android:textSize="@dimen/text_large" />
     </LinearLayout>
-
-    <Spinner
-        android:id="@+id/spinner_camera"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/space_small"
-        android:textSize="@dimen/text_large" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/space_small"
+        android:layout_margin="@dimen/space_smaller"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="@dimen/space_small"
-            android:gravity="center"
-            android:text="Speed" />
-
-        <Spinner
-            android:id="@+id/spinner_speed"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/space_small"
-            android:gravity="center_vertical"
-            android:textSize="@dimen/text_large" />
+            android:layout_weight="3"
+            android:padding="@dimen/space_small"
+            android:text="Name" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/shape_border">
+
+            <Spinner
+                android:id="@+id/spinner_camera"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="@dimen/space_smaller"
+                android:layout_marginTop="@dimen/space_smaller" />
+        </FrameLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/space_smaller"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/space_small"
+            android:layout_weight="3"
+            android:text="Speed" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/shape_border">
+
+            <Spinner
+                android:id="@+id/spinner_speed"
+                android:layout_width="match_parent"
+                android:layout_marginTop="@dimen/space_smaller"
+                android:layout_marginBottom="@dimen/space_smaller"
+                android:layout_height="match_parent" />
+        </FrameLayout>
     </LinearLayout>
 
     <Button

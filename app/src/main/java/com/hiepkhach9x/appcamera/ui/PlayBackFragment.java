@@ -137,11 +137,11 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
         view.findViewById(R.id.to_date).setOnClickListener(this);
         view.findViewById(R.id.get_data).setOnClickListener(this);
 
-        ArrayAdapter spinnerSpeedAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_item, arrSpeeds);
+        ArrayAdapter spinnerSpeedAdapter = new ArrayAdapter(getContext(), R.layout.item_spinner, arrSpeeds);
         spinnerSpeed.setAdapter(spinnerSpeedAdapter);
 
 
-        ArrayAdapter spinnerArrayAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_item, mCameras);
+        ArrayAdapter spinnerArrayAdapter = new ArrayAdapter(getContext(), R.layout.item_spinner, mCameras);
         spinnerCamera.setAdapter(spinnerArrayAdapter);
 
         storeAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_list_item_1, storeDataList);
@@ -169,6 +169,16 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         initClient();
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        fromDate = calendar.getTime();
+
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        toDate = calendar.getTime();
     }
 
     private void initClient() {
@@ -288,9 +298,15 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
         calendar.set(Calendar.MONTH, monthOfYear);
         calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
         if (selectedType == DateType.FromDate) {
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
             fromDate = calendar.getTime();
             txtFromDate.setText(String.format(Locale.ENGLISH, "%02d-%02d-%02d", year, monthOfYear + 1, dayOfMonth));
         } else if (selectedType == DateType.ToDate) {
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
             txtFromDate.setText(String.format(Locale.ENGLISH, "%02d-%02d-%02d", year, monthOfYear + 1, dayOfMonth));
             toDate = calendar.getTime();
         }

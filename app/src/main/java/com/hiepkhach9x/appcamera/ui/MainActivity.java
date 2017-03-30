@@ -258,7 +258,7 @@ public class MainActivity extends AppCompatActivity implements NavigateManager, 
             visibility = View.VISIBLE;
         } else if (activePage instanceof ListCameraFragment) {
             visibility = View.VISIBLE;
-            text = "Play Back";
+            text = "Play back";
         } else if (activePage instanceof PlayBackFragment) {
             visibility = View.GONE;
         } else if (activePage instanceof VODFragment) {
