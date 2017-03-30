@@ -244,7 +244,7 @@ public class MessageParser {
                 Log.d("HungHN","FileName: " + fileName);
                 data.setFileName(fileName);
             }
-            if(endFileName + 2 < bytes.length) {
+            if(endFileName + 2 <= bytes.length) {
                 short time = BitConverter.toInt16(bytes,endFileName);
                 Log.d("Hung","Time: " + time);
                 data.setTime(time);
@@ -290,7 +290,7 @@ public class MessageParser {
         return builder.toString();
     }
 
-    public byte[] genMessageVODData(String cameraId, String fileName, short time, char playSpeed) {
+    public byte[] genMessageVODData(String cameraId, String fileName, short time, byte playSpeed) {
         try {
             String msg = "@message@yeucauVOD@message@";
             ByteArrayOutputStream bytes = new ByteArrayOutputStream();
@@ -299,7 +299,7 @@ public class MessageParser {
             bytes.write(BitConverter.getBytes(id));
             bytes.write(fileName.getBytes());
             bytes.write(BitConverter.getBytes(time));
-            bytes.write(BitConverter.getBytes(playSpeed));
+            bytes.write(BitConverter.getBytes(playSpeed),0,1);
             return bytes.toByteArray();
         } catch (IOException e) {
             e.printStackTrace();

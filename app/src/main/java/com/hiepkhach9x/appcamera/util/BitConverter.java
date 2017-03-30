@@ -9,8 +9,15 @@ import java.util.UUID;
 
 public final class BitConverter {
 
-    public static byte[] getBytes(char v) {
+    public static byte[] getBytes(byte v) {
         byte[] writeBuffer = new byte[1];
+        writeBuffer[0] = v;
+        return writeBuffer;
+    }
+
+    public static byte[] getBytes(char v) {
+        byte[] writeBuffer = new byte[2];
+        writeBuffer[1] = (byte) ((v >>> 8) & 0xFF);
         writeBuffer[0] = (byte) ((v >>> 0) & 0xFF);
         return writeBuffer;
     }

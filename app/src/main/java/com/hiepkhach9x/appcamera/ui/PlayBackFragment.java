@@ -79,8 +79,8 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
                     currentCamera = mCameras.get(spinnerCamera.getSelectedItemPosition());
                     ArrayList<String> listId = new ArrayList<>();
                     listId.add(currentCamera.getCameraId());
-                    String msg = messageParser.genMessagePlayBack(convertDateToString(fromDate),
-                            convertDateToString(toDate), listId);
+                    String msg = messageParser.genMessagePlayBack(convertDateSendServer(fromDate),
+                            convertDateSendServer(toDate), listId);
                     if (playBackClient != null)
                         playBackClient.sendGetDataMessage(msg);
                     return true;
@@ -129,7 +129,15 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
         listData = (ListView) view.findViewById(R.id.list_data);
 
         Calendar calendar = Calendar.getInstance();
-        fromDate = toDate = calendar.getTime();
+        calendar.set(Calendar.HOUR, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        fromDate = calendar.getTime();
+
+        calendar.set(Calendar.HOUR, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        toDate = calendar.getTime();
         txtFromDate.setText(convertDateToString(fromDate));
         txtToDate.setText(convertDateToString(toDate));
 
@@ -169,16 +177,6 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         initClient();
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        fromDate = calendar.getTime();
-
-        calendar.set(Calendar.HOUR_OF_DAY, 23);
-        calendar.set(Calendar.MINUTE, 59);
-        calendar.set(Calendar.SECOND, 59);
-        toDate = calendar.getTime();
     }
 
     private void initClient() {
@@ -247,6 +245,16 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
         try {
             @SuppressLint("SimpleDateFormat")
             DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+            return df.format(date);
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    private String convertDateSendServer(Date date) {
+        try {
+            @SuppressLint("SimpleDateFormat")
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             return df.format(date);
         } catch (Exception e) {
             return "";

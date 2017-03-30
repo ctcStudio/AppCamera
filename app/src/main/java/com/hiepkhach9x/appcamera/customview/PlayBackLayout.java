@@ -56,10 +56,13 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
     private final int ARGS_WHAT_PLAY_BACK = 123;
     private static final int ARGS_WHAT_SEND_PLAY_BACK = 124;
     private static final int ARGS_WHAT_ERROR_LOGIN = 125;
+    private static final int ARGS_WHAT_SEND_FORWARD_PLAY = 126;
+    private static final int ARGS_WHAT_SEND_FORWARD = 127;
+    private final int ARGS_WHAT_PLAY_FORWARD = 128;
 
     private short timePlay = 0; // from 0 - 3600s độ dài 2 bytes dạng unsigned integer 16
     private int mPlaySpeed = 1; // from x1-x9 độ dài 1 bytes dạng unsigned integer 8
-    private final char[] PLAY_SPEED_ARR = new char[] {'1','2','3','4','5','6','7','8','9'};
+    private final byte[] PLAY_SPEED_ARR = new byte[] {1,2,3,4,5,6,7,8,9};
 
     private Client mClient;
     private PlayBackThread playBackThread;
@@ -69,11 +72,86 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
     private boolean isConnectSuccess;
     private VOData lastVodData;
     private short lastTime = -1;
+    private boolean forwardPlay = false;
     private Handler mHandler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(android.os.Message message) {
             switch (message.what) {
                 case ARGS_WHAT_PLAY_BACK:
+                    if (message.obj instanceof VOData) {
+                        VOData voData = (VOData) message.obj;
+                        if (voData.getPictureData() != null) {
+                            Drawable drawable = new BitmapDrawable(getResources(), voData.getPictureData());
+                            if (Build.VERSION.SDK_INT > 16) {
+                                mCameraView.setBackground(drawable);
+                            } else {
+                                mCameraView.setBackgroundDrawable(drawable);
+                            }
+                        }
+                        if (voData.getGpsData() != null) {
+                            GpsInfo gpsInfo = voData.getGpsData();
+                            if (!TextUtils.isEmpty(voData.getFileName()) && voData.getTime() > 0) {
+                                String date = voData.getFileName() + " " + (voData.getTime() / 60) + ":" + (voData.getTime() % 60);
+                                setCameraSpeed((int) gpsInfo.getSpeedKm(), date);
+                            }
+                            showGpsLocation(gpsInfo.getLat(), gpsInfo.getLog());
+                            if (!TextUtils.isEmpty(gpsInfo.getAddress())) {
+                                mTxtCameraAddress.setText(gpsInfo.getAddress());
+                            }
+                        }
+                        lastVodData = voData;
+                        if (updateVodInfo != null) {
+                            updateVodInfo.onUpdateInfo(voData);
+                        }
+                        short time = voData.getTime();
+                        if(seekBar !=null
+                                && time >=lastTime
+                                && !changeTimePlay) {
+                            seekBar.setProgress(time);
+                            lastTime = time;
+                        }
+                    }
+                    return true;
+                case ARGS_WHAT_SEND_PLAY_BACK:
+                    if (mClient != null
+                            && mCamera != null
+                            && !TextUtils.isEmpty(mCamera.getCameraId())
+                            && isConnectSuccess) {
+                        byte[] msg = parser.genMessageVODData(mCamera.getCameraId(), fileName, timePlay, PLAY_SPEED_ARR[mPlaySpeed]);
+                        mClient.sendGetVODDataMessage(msg);
+                    }
+                    return true;
+                case ARGS_WHAT_ERROR_LOGIN:
+                    setBackgroundResource(R.drawable.ic_connect_error);
+                    return true;
+
+                case ARGS_WHAT_SEND_FORWARD:
+                    if (mClient != null
+                            && mCamera != null
+                            && !TextUtils.isEmpty(mCamera.getCameraId())
+                            && isConnectSuccess) {
+                        short stopTime = 3601;
+                        byte[] msg = parser.genMessageVODData(mCamera.getCameraId(), fileName,stopTime , PLAY_SPEED_ARR[mPlaySpeed]);
+                        mClient.sendGetVODDataMessage(msg);
+                    }
+                    if (mHandler != null) {
+                        mHandler.sendEmptyMessageDelayed(ARGS_WHAT_SEND_FORWARD_PLAY, 1000);
+                        forwardPlay = true;
+                    }
+                    return true;
+
+                case ARGS_WHAT_SEND_FORWARD_PLAY:
+                    if (mClient != null
+                            && mCamera != null
+                            && !TextUtils.isEmpty(mCamera.getCameraId())
+                            && isConnectSuccess) {
+                        byte[] msg = parser.genMessageVODData(mCamera.getCameraId(), fileName, timePlay, PLAY_SPEED_ARR[mPlaySpeed]);
+                        mClient.sendGetVODDataMessage(msg);
+                        seekBar.setEnabled(false);
+                    }
+                    return true;
+
+                case ARGS_WHAT_PLAY_FORWARD:
                     if (message.obj instanceof VOData) {
                         VOData voData = (VOData) message.obj;
                         if (voData.getPictureData() != null) {
@@ -112,18 +190,6 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
                         }
                     }
                     return true;
-                case ARGS_WHAT_SEND_PLAY_BACK:
-                    if (mClient != null
-                            && mCamera != null
-                            && !TextUtils.isEmpty(mCamera.getCameraId())
-                            && isConnectSuccess) {
-                        byte[] msg = parser.genMessageVODData(mCamera.getCameraId(), fileName, timePlay, PLAY_SPEED_ARR[mPlaySpeed]);
-                        mClient.sendGetVODDataMessage(msg);
-                        seekBar.setEnabled(false);
-                    }
-                    return true;
-                case ARGS_WHAT_ERROR_LOGIN:
-                    setBackgroundResource(R.drawable.ic_connect_error);
                 default:
                     return false;
             }
@@ -193,7 +259,7 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
             public void onStopTrackingTouch(SeekBar seekBar) {
                 timePlay = (short) seekBar.getProgress();
                 if (mHandler != null) {
-                    mHandler.sendEmptyMessageDelayed(ARGS_WHAT_SEND_PLAY_BACK, 1000);
+                    mHandler.sendEmptyMessage(ARGS_WHAT_SEND_FORWARD);
                 }
             }
         });
@@ -314,7 +380,11 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
             }
         } else if (messageClient.isVOData()) {
             android.os.Message message = new android.os.Message();
-            message.what = ARGS_WHAT_PLAY_BACK;
+            if(forwardPlay) {
+                message.what = ARGS_WHAT_PLAY_FORWARD;
+            } else {
+                message.what = ARGS_WHAT_PLAY_BACK;
+            }
             VOData voData= parser.parseVODMessage(messageClient);
             message.obj = voData;
             if(voData !=null) {
@@ -329,7 +399,8 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
     private  long lastGetRealTime = 0;
     private boolean loadSuccess = true;
     private void getAddress(GpsInfo gps){
-        if(System.currentTimeMillis() - lastGetRealTime > (30 * 1000)
+        if (gps != null
+                && System.currentTimeMillis() - lastGetRealTime > (30 * 1000)
                 && loadSuccess) {
             FetchAddressIntentService.startIntentService(getContext(),
                     mCamera.getCameraId(),gps.getLat(),gps.getLog(),new AddressResultReceiver());

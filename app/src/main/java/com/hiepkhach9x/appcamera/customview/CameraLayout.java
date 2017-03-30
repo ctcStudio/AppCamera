@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -165,6 +166,9 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.item_list_camera, this);
 
+        SeekBar seekBar = (SeekBar) findViewById(R.id.progress);
+        seekBar.setVisibility(GONE);
+
         mCameraView = (CameraView) findViewById(R.id.camera);
         mCameraView.setCameraId(mCamera.getCameraId());
 
@@ -309,7 +313,7 @@ public class CameraLayout extends FrameLayout implements IMessageListener, OnMap
 
     private void getAddress(GpsInfo gps) {
         if (System.currentTimeMillis() - lastGetRealTime > (30 * 1000) && loadSuccess) {
-            if (gps != null) {
+            if (null != gps) {
                 FetchAddressIntentService.startIntentService(getContext(),
                         mCamera.getCameraId(), gps.getLat(), gps.getLog(), new AddressResultReceiver());
                 lastGetRealTime = System.currentTimeMillis();
