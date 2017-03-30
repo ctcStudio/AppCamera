@@ -15,7 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -57,7 +57,7 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
     private static final int ARGS_WHAT_SEND_PLAY_BACK = 124;
     private static final int ARGS_WHAT_ERROR_LOGIN = 125;
 
-    private final short TIME_PLAY = 1000; // from 0 - 3600s độ dài 2 bytes dạng unsigned integer 16
+    private short timePlay = 0; // from 0 - 3600s độ dài 2 bytes dạng unsigned integer 16
     private int mPlaySpeed = 1; // from x1-x9 độ dài 1 bytes dạng unsigned integer 8
     private final char[] PLAY_SPEED_ARR = new char[] {'1','2','3','4','5','6','7','8','9'};
 
@@ -86,7 +86,7 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
                         }
                         if (voData.getGpsData() != null) {
                             GpsInfo gpsInfo = voData.getGpsData();
-                            if (!TextUtils.isEmpty(voData.getFileName()) || voData.getTime() > 0) {
+                            if (!TextUtils.isEmpty(voData.getFileName()) && voData.getTime() > 0) {
                                 String date = voData.getFileName() + " " + (voData.getTime() / 60) + ":" + (voData.getTime() % 60);
                                 setCameraSpeed((int) gpsInfo.getSpeedKm(), date);
                             }
@@ -100,9 +100,15 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
                             updateVodInfo.onUpdateInfo(voData);
                         }
                         short time = voData.getTime();
-                        if(progressBar!=null && time >=lastTime ) {
-                            progressBar.setProgress(time);
+                        if(seekBar !=null
+                                && time >=lastTime
+                                && !changeTimePlay) {
+                            seekBar.setProgress(time);
                             lastTime = time;
+                        }
+                        if(time >=timePlay) {
+                            seekBar.setEnabled(true);
+                            changeTimePlay = false;
                         }
                     }
                     return true;
@@ -111,8 +117,9 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
                             && mCamera != null
                             && !TextUtils.isEmpty(mCamera.getCameraId())
                             && isConnectSuccess) {
-                        byte[] msg = parser.genMessageVODData(mCamera.getCameraId(), fileName, TIME_PLAY, PLAY_SPEED_ARR[mPlaySpeed]);
+                        byte[] msg = parser.genMessageVODData(mCamera.getCameraId(), fileName, timePlay, PLAY_SPEED_ARR[mPlaySpeed]);
                         mClient.sendGetVODDataMessage(msg);
+                        seekBar.setEnabled(false);
                     }
                     return true;
                 case ARGS_WHAT_ERROR_LOGIN:
@@ -131,7 +138,7 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
     private String fileName;
     private MapView mapView;
     private GoogleMap gMap;
-    private ProgressBar progressBar;
+    private SeekBar seekBar;
     private Bundle savedInstanceState = null;
 
     public PlayBackLayout(Context context, Camera camera, String fileName,int playSpeed, Bundle bundle) {
@@ -158,6 +165,7 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
         initializeViews(context);
     }
 
+    boolean changeTimePlay = true;
     private void initializeViews(Context context) {
         parser = new MessageParser();
 
@@ -168,9 +176,27 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
         mCameraView = (CameraView) findViewById(R.id.camera);
         mCameraView.setCameraId(mCamera.getCameraId());
 
-        progressBar = (ProgressBar) findViewById(R.id.progress);
-        progressBar.setVisibility(VISIBLE);
-        progressBar.setMax(3600);
+        seekBar = (SeekBar) findViewById(R.id.progress);
+        seekBar.setVisibility(VISIBLE);
+        seekBar.setMax(3600);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                changeTimePlay = true;
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                timePlay = (short) seekBar.getProgress();
+                if (mHandler != null) {
+                    mHandler.sendEmptyMessageDelayed(ARGS_WHAT_SEND_PLAY_BACK, 1000);
+                }
+            }
+        });
 
         mTxtCameraInfo = (TextView) findViewById(R.id.camera_info);
         setCameraInfo();
