@@ -17,6 +17,7 @@
             android:layout_weight="3"
             android:padding="@dimen/space_normal"
             android:text="From:"
+            android:textColor="@android:color/black"
             android:textSize="@dimen/text_large" />
 
         <TextView
@@ -24,11 +25,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@drawable/shape_border"
             android:drawableRight="@drawable/arrow_drop_down_black"
             android:gravity="center_vertical|right"
-            android:background="@drawable/shape_border"
             android:padding="@dimen/space_smaller"
             android:text="3017/01/20"
+            android:textColor="@android:color/black"
             android:textSize="@dimen/text_large" />
     </LinearLayout>
 
@@ -45,6 +47,7 @@
             android:layout_weight="3"
             android:padding="@dimen/space_normal"
             android:text="To:"
+            android:textColor="@android:color/black"
             android:textSize="@dimen/text_large" />
 
         <TextView
@@ -52,11 +55,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:background="@drawable/shape_border"
             android:drawableRight="@drawable/arrow_drop_down_black"
             android:gravity="center_vertical|right"
             android:padding="@dimen/space_smaller"
             android:text="2017/01/20"
-            android:background="@drawable/shape_border"
+            android:textColor="@android:color/black"
             android:textSize="@dimen/text_large" />
     </LinearLayout>
 
@@ -72,6 +76,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="3"
             android:padding="@dimen/space_small"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/text_large"
             android:text="Name" />
 
         <FrameLayout
@@ -84,8 +90,16 @@
                 android:id="@+id/spinner_camera"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginBottom="@dimen/space_smaller"
-                android:layout_marginTop="@dimen/space_smaller" />
+                android:paddingRight="20dp"
+                android:background="@android:color/transparent" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableRight="@drawable/arrow_drop_down_black"
+                android:layout_gravity="center_vertical"
+                android:padding="@dimen/space_smaller"
+                android:textSize="@dimen/text_large" />
         </FrameLayout>
     </LinearLayout>
 
@@ -99,8 +113,10 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="@dimen/space_small"
             android:layout_weight="3"
+            android:padding="@dimen/space_small"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/text_large"
             android:text="Speed" />
 
         <FrameLayout
@@ -112,9 +128,17 @@
             <Spinner
                 android:id="@+id/spinner_speed"
                 android:layout_width="match_parent"
-                android:layout_marginTop="@dimen/space_smaller"
-                android:layout_marginBottom="@dimen/space_smaller"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:paddingRight="20dp"
+                android:background="@android:color/transparent" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableRight="@drawable/arrow_drop_down_black"
+                android:layout_gravity="center_vertical"
+                android:padding="@dimen/space_smaller"
+                android:textSize="@dimen/text_large" />
         </FrameLayout>
     </LinearLayout>
 

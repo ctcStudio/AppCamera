@@ -45,6 +45,7 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
 
     private static final String KEY_ARG_CAMERA = "key.arg.camera";
     private static final String TAG = "TAG_PLAYBACK";
+    private static final String KEY_ARGS_STORE_DATA = "key.arg.store.data";
     private final int ARGS_WHAT_PLAY_BACK = 112;
     private static final int ARGS_WHAT_SEND_PLAY_BACK = 113;
 
@@ -104,6 +105,7 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             mCameras = savedInstanceState.getParcelableArrayList(KEY_ARG_CAMERA);
+            storeDataList = savedInstanceState.getParcelableArrayList(KEY_ARGS_STORE_DATA);
         } else if (getArguments() != null) {
             mCameras = getArguments().getParcelableArrayList(KEY_ARG_CAMERA);
         }
@@ -119,6 +121,26 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
         handler = new Handler(callback);
     }
 
+    public Date getEndOfDay(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
+        return calendar.getTime();
+    }
+
+    public Date getStartOfDay(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
+    }
+
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -128,16 +150,8 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
         spinnerSpeed = (Spinner) view.findViewById(R.id.spinner_speed);
         listData = (ListView) view.findViewById(R.id.list_data);
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        fromDate = calendar.getTime();
-
-        calendar.set(Calendar.HOUR, 23);
-        calendar.set(Calendar.MINUTE, 59);
-        calendar.set(Calendar.SECOND, 59);
-        toDate = calendar.getTime();
+        fromDate = getStartOfDay(Calendar.getInstance(Locale.getDefault()).getTime());
+        toDate = getEndOfDay(Calendar.getInstance(Locale.getDefault()).getTime());
         txtFromDate.setText(convertDateToString(fromDate));
         txtToDate.setText(convertDateToString(toDate));
 
@@ -179,6 +193,13 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
         initClient();
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList(KEY_ARGS_STORE_DATA,storeDataList);
+        outState.putParcelableArrayList(KEY_ARG_CAMERA,mCameras);
+    }
+
     private void initClient() {
         Runnable runnable = new Runnable() {
             @Override
@@ -195,7 +216,6 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
             }
         };
         showDialog();
-        storeDataList.clear();
         new Thread(runnable).start();
     }
 
@@ -306,17 +326,11 @@ public class PlayBackFragment extends BaseFragment implements View.OnClickListen
         calendar.set(Calendar.MONTH, monthOfYear);
         calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
         if (selectedType == DateType.FromDate) {
-            calendar.set(Calendar.HOUR_OF_DAY, 0);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-            fromDate = calendar.getTime();
             txtFromDate.setText(String.format(Locale.ENGLISH, "%02d-%02d-%02d", year, monthOfYear + 1, dayOfMonth));
+            fromDate = getStartOfDay(calendar.getTime());
         } else if (selectedType == DateType.ToDate) {
-            calendar.set(Calendar.HOUR_OF_DAY, 23);
-            calendar.set(Calendar.MINUTE, 59);
-            calendar.set(Calendar.SECOND, 59);
-            txtFromDate.setText(String.format(Locale.ENGLISH, "%02d-%02d-%02d", year, monthOfYear + 1, dayOfMonth));
-            toDate = calendar.getTime();
+            txtToDate.setText(String.format(Locale.ENGLISH, "%02d-%02d-%02d", year, monthOfYear + 1, dayOfMonth));
+            toDate = getEndOfDay(calendar.getTime());
         }
     }
 }

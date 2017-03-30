@@ -51,6 +51,7 @@ import java.util.Locale;
 public class PlayBackLayout extends FrameLayout implements IMessageListener, OnMapReadyCallback {
     public final static String TAG = "Camera_Layout";
     private final String INFO_FORMAT = "%s %s";
+    private final String DATE_FORMAT = "%s:%02d:%02d";
     private final String SPEED_FORMAT = "%s  %d km/h";
 
     private final int ARGS_WHAT_PLAY_BACK = 123;
@@ -91,7 +92,9 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
                         if (voData.getGpsData() != null) {
                             GpsInfo gpsInfo = voData.getGpsData();
                             if (!TextUtils.isEmpty(voData.getFileName()) && voData.getTime() > 0) {
-                                String date = voData.getFileName() + " " + (voData.getTime() / 60) + ":" + (voData.getTime() % 60);
+                                int hour = (voData.getTime() / 60);
+                                int minute = (voData.getTime() % 60);
+                                String date = String.format(Locale.getDefault(),DATE_FORMAT,voData.getFileName(),hour,minute);
                                 setCameraSpeed((int) gpsInfo.getSpeedKm(), date);
                             }
                             showGpsLocation(gpsInfo.getLat(), gpsInfo.getLog());
@@ -165,7 +168,9 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
                         if (voData.getGpsData() != null) {
                             GpsInfo gpsInfo = voData.getGpsData();
                             if (!TextUtils.isEmpty(voData.getFileName()) && voData.getTime() > 0) {
-                                String date = voData.getFileName() + " " + (voData.getTime() / 60) + ":" + (voData.getTime() % 60);
+                                int hour = (voData.getTime() / 60);
+                                int minute = (voData.getTime() % 60);
+                                String date = String.format(Locale.getDefault(),DATE_FORMAT,voData.getFileName(),hour,minute);
                                 setCameraSpeed((int) gpsInfo.getSpeedKm(), date);
                             }
                             showGpsLocation(gpsInfo.getLat(), gpsInfo.getLog());

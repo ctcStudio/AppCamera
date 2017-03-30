@@ -7,6 +7,8 @@
     android:ellipsize="marquee"
     android:textAlignment="inherit"
     android:padding="@dimen/space_smaller"
+    android:layout_marginRight="@dimen/space_largest"
+    android:textColor="@android:color/black"
     android:textSize="@dimen/text_large"
     android:gravity="center_vertical|right" />
 
