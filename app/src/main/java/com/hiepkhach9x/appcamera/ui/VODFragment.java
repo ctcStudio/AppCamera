@@ -218,9 +218,11 @@ public class VODFragment extends BaseFragment implements OnMapReadyCallback, Cli
 
     @Override
     public void onClickCamera(String cameraId) {
+        /*
         layoutImage.setVisibility(View.VISIBLE);
         mapFull.setVisibility(View.GONE);
         playBackLayout.setUpdateVodInfo(this);
+        */
     }
 
     @Override

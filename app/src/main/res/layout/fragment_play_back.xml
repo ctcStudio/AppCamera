@@ -78,7 +78,7 @@
             android:padding="@dimen/space_small"
             android:textColor="@android:color/black"
             android:textSize="@dimen/text_large"
-            android:text="Name" />
+            android:text="Name:" />
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -117,7 +117,7 @@
             android:padding="@dimen/space_small"
             android:textColor="@android:color/black"
             android:textSize="@dimen/text_large"
-            android:text="Speed" />
+            android:text="Speed:" />
 
         <FrameLayout
             android:layout_width="match_parent"
