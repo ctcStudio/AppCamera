@@ -191,7 +191,7 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
                         }
                         if(time >=timePlay) {
                             seekBar.setEnabled(true);
-                            changeTimePlay = false;
+                            changeTimePlay = true;
                         }
                     }
                     return true;
@@ -236,7 +236,7 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
         initializeViews(context);
     }
 
-    boolean changeTimePlay = true;
+    boolean changeTimePlay;
     private void initializeViews(Context context) {
         parser = new MessageParser();
 
