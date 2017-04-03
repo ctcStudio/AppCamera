@@ -138,7 +138,7 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
                         mClient.sendGetVODDataMessage(msg);
                     }
                     if (mHandler != null) {
-                        mHandler.sendEmptyMessageDelayed(ARGS_WHAT_SEND_FORWARD_PLAY, 1000);
+                        mHandler.sendEmptyMessageDelayed(ARGS_WHAT_SEND_FORWARD_PLAY, 2000);
                         forwardPlay = true;
                     }
                     return true;
@@ -191,7 +191,7 @@ public class PlayBackLayout extends FrameLayout implements IMessageListener, OnM
                         }
                         if(time >=timePlay) {
                             seekBar.setEnabled(true);
-                            changeTimePlay = true;
+                            changeTimePlay = false;
                         }
                     }
                     return true;
